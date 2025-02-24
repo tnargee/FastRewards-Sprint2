@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FastRewards - Sign Up</title>
+    <link rel="stylesheet" href="sign-up.css" />
+  </head>
+  <body>
+    <header class="top-header">
+      <h1>FastRewards</h1>
+    </header>
+
+    <main class="signup-page">
+      <section class="signup-container">
+        <!-- Big heading for the page -->
+        <h2>Sign Up</h2>
+
+        <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+          <!-- Row for first/last name -->
+          <div class="name-row">
+            <div class="form-field">
+              <label for="firstName">First Name</label>
+              <input
+                id="firstName"
+                formControlName="firstName"
+                type="text"
+                placeholder="First Name"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  signUpForm.get('firstName')?.touched &&
+                  signUpForm.get('firstName')?.invalid
+                "
+              >
+                First name is required
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="lastName">Last Name</label>
+              <input
+                id="lastName"
+                formControlName="lastName"
+                type="text"
+                placeholder="Last Name"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  signUpForm.get('lastName')?.touched &&
+                  signUpForm.get('lastName')?.invalid
+                "
+              >
+                Last name is required
+              </div>
+            </div>
+          </div>
+
+          <!-- Email field -->
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              formControlName="email"
+              type="email"
+              placeholder="Email"
+            />
+            <div
+              class="error"
+              *ngIf="
+                signUpForm.get('email')?.touched &&
+                signUpForm.get('email')?.invalid
+              "
+            >
+              Please enter a valid email
+            </div>
+          </div>
+
+          <!-- Password field -->
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              formControlName="password"
+              type="password"
+              placeholder="Password"
+            />
+            <div
+              class="error"
+              *ngIf="
+                signUpForm.get('password')?.touched &&
+                signUpForm.get('password')?.invalid
+              "
+            >
+              Password must be at least 6 characters
+            </div>
+          </div>
+
+          <!-- Sign up button -->
+          <button type="submit" class="sign-up-button">Sign Up</button>
+        </form>
+
+        <div class="divider-row">
+          <hr />
+          <span>or</span>
+          <hr />
+        </div>
+
+        <button class="google-button">Continue with Google</button>
+
+        <p class="signin-link">
+          Have an account? <a href="sign-in.html">Sign In</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
