@@ -14,49 +14,27 @@
       <section class="signup-container">
         <h2>Sign In</h2>
 
-        <form [formGroup]="signInForm" (ngSubmit)="onSubmit()">
+        <form>
           <!-- Email field -->
           <div class="form-field">
             <label for="email">Email</label>
-            <input
-              id="email"
-              formControlName="email"
-              type="email"
-              placeholder="Email"
-            />
-            <div
-              class="error"
-              *ngIf="
-                signInForm.get('email')?.touched &&
-                signInForm.get('email')?.invalid
-              "
-            >
-              Please enter a valid email
-            </div>
+            <input id="email" type="email" placeholder="Email" />
           </div>
 
           <!-- Password field -->
           <div class="form-field">
             <label for="password">Password</label>
-            <input
-              id="password"
-              formControlName="password"
-              type="password"
-              placeholder="Password"
-            />
-            <div
-              class="error"
-              *ngIf="
-                signInForm.get('password')?.touched &&
-                signInForm.get('password')?.invalid
-              "
-            >
-              Password is required
-            </div>
+            <input id="password" type="password" placeholder="Password" />
           </div>
 
           <!-- Sign in button -->
-          <button type="submit" class="sign-up-button">Sign In</button>
+          <button
+            type="button"
+            class="sign-up-button"
+            onclick="window.location.href='scan.html'"
+          >
+            Sign In
+          </button>
         </form>
 
         <div class="divider-row">
@@ -68,8 +46,7 @@
         <button class="google-button">Continue with Google</button>
 
         <p class="signin-link">
-          Don’t have an account?
-          <a href="sign-up.html">Sign Up</a>
+          Don’t have an account? <a href="sign-up.html">Sign Up</a>
         </p>
       </section>
     </main>
