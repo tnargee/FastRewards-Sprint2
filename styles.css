@@ -1,0 +1,127 @@
+/* Global Body Styles */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Top Navbar */
+  .top-navbar {
+    height: 70px;
+    min-height: 70px;
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Navbar Brand and Search Input */
+  .navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    /* Extra right margin on small screens will be applied via media query */
+  }
+  
+  .search-input {
+    width: 700px;
+    max-width: 100%;
+  }
+  
+  /* Wrapper for Sidebar and Content */
+  #wrapper {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 70px); /* Full height below the navbar */
+  }
+  
+  /* Sidebar for Larger Screens */
+  #sidebar {
+    min-width: 200px;
+    max-width: 200px;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+  }
+  
+  #sidebar .list-group-item {
+    border: none;
+    padding: 1rem 1.25rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  #sidebar .list-group-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  #sidebar .list-group-item.active {
+    background-color: #ff3b30;
+    color: #fff;
+  }
+  
+  /* Page Content Wrapper */
+  #page-content-wrapper {
+    width: 100%;
+    background-color: #fff;
+    padding: 2rem;
+  }
+  
+  /* Scan Content Styles */
+  .scan-content {
+    background-color: #fff;
+    padding: 2rem;
+    min-height: calc(100vh - 70px - 4rem);
+  }
+  
+  .scan-icon i {
+    font-size: 4rem;
+    color: #ff3b30;
+  }
+  
+  .stars {
+    font-size: 1.25rem;
+    color: #ffd700;
+    margin-top: 0.5rem;
+  }
+
+  #camera-btn {
+    background-color: #1f1f1f;
+    border: 1px solid #1f1f1f;
+  }
+  
+  /* Collapsible Side Menu for Small Screens */
+  .top-navbar .collapse {
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+  }
+  
+  .top-navbar .collapse ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .top-navbar .collapse ul li a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .top-navbar .collapse ul li a:hover,
+  .top-navbar .collapse ul li a.active {
+    background-color: #ff3b30;
+    color: #fff;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 1050px) {
+    /* Hide search bar on small screens */
+    .search-input {
+      display: none;
+    }
+    /* Add right margin to brand name on small screens */
+    .navbar-brand {
+      margin-right: 15px;
+    }
+  }
+  
