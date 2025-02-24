@@ -6,7 +6,6 @@ body {
     font-family: Arial, sans-serif;
   }
   
-  /* Top Navbar */
   .top-navbar {
     height: 70px;
     min-height: 70px;
@@ -15,11 +14,9 @@ body {
     border-bottom: 1px solid #ddd;
   }
   
-  /* Navbar Brand and Search Input */
   .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
-    /* Extra right margin on small screens will be applied via media query */
   }
   
   .search-input {
@@ -31,7 +28,7 @@ body {
   #wrapper {
     display: flex;
     width: 100%;
-    min-height: calc(100vh - 70px); /* Full height below the navbar */
+    min-height: calc(100vh - 70px);
   }
   
   /* Sidebar for Larger Screens */
@@ -57,14 +54,12 @@ body {
     color: #fff;
   }
   
-  /* Page Content Wrapper */
   #page-content-wrapper {
     width: 100%;
     background-color: #fff;
     padding: 2rem;
   }
   
-  /* Scan Content Styles */
   .scan-content {
     background-color: #fff;
     padding: 2rem;

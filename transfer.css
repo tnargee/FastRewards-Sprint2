@@ -1,0 +1,38 @@
+.transfer-content {
+    background-color: #fff;
+    padding: 2rem;
+    min-height: calc(100vh - 70px - 4rem);
+  }
+  
+  .transfer-section {
+    margin-bottom: 2rem;
+  }
+
+  .transfer-restaurant-logo {
+    width: 200px;
+    margin-bottom: 30px;
+  }
+  
+  .transfer-col {
+    padding: 1rem;
+  }
+  
+  .conversion-rate {
+    font-weight: bold;
+  }
+  
+  .receive-label {
+    font-size: 1.1rem;
+  }
+  
+  .recent-transfers h5 {
+    margin-bottom: 1rem;
+  }
+  
+  .recent-transfers .list-group-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  
+  
