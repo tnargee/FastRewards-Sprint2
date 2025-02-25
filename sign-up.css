@@ -1,3 +1,18 @@
+/* 
+  Authors: Kyle Vitayanuvatti, Tenzin Nargee
+*/
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .top-header {
   width: 100%;
   text-align: center;
