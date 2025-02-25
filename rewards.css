@@ -1,5 +1,5 @@
 /* 
-  Authors: Kyle Vitayanuvatti
+  Authors: Kyle Vitayanuvatti, Tenzin Nargee
 */
 
 /* Rewards page container */
@@ -20,6 +20,12 @@
   justify-content: center;
   font-size: 1.2rem;
   font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.current-points-card:hover {
+  transform: scale(1.05);
 }
 
 /* Big brand logo */
