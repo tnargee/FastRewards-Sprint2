@@ -1,0 +1,41 @@
+# IDE Files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# PHP Testing/Debug Files
+test_db.php
+test_db_class.php
+check_config.php
+init_db_new.php
+error_log
+*.log
+
+# Composer
+/vendor/
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Local config overrides
+config.local.php
+
+# Cache and temporary files
+/cache/
+/tmp/
+*.tmp
+*.swp
+*.bak
+
+# PHP CS Fixer
+.php_cs.cache
+.php-cs-fixer.cache
+
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
