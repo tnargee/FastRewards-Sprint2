@@ -116,7 +116,7 @@ class FastRewardsController {
             
             if(empty($email)) {
                 $errors[] = "Email is required.";
-            } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            } elseif(!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
                 $errors[] = "Please enter a valid email address.";
             }
             
