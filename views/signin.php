@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="author" content="Kyle Vitayanuvatti">
     <title>FastRewards - Sign In</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="sign-up.css" />
-    <!-- URL:  https://cs4640.cs.virginia.edu/ghf3ky/sprint2/index.html -->
   </head>
   <body>
     <header class="top-header">
@@ -16,27 +17,25 @@
       <section class="signup-container">
         <h2>Sign In</h2>
 
-        <form>
+        <?php if (isset($message) && !empty($message)): ?>
+            <div class="alert alert-danger"><?php echo $message; ?></div>
+        <?php endif; ?>
+
+        <form action="index.php?command=processSignIn" method="post">
           <!-- Email field -->
           <div class="form-field">
             <label for="email">Email</label>
-            <input id="email" type="email" placeholder="Email" />
+            <input id="email" name="email" type="email" placeholder="Email" required />
           </div>
 
           <!-- Password field -->
           <div class="form-field">
             <label for="password">Password</label>
-            <input id="password" type="password" placeholder="Password" />
+            <input id="password" name="password" type="password" placeholder="Password" required />
           </div>
 
           <!-- Sign in button -->
-          <button
-            type="button"
-            class="sign-up-button"
-            onclick="window.location.href='scan.html'"
-          >
-            Sign In
-          </button>
+          <button type="submit" class="sign-up-button">Sign In</button>
         </form>
 
         <div class="divider-row">
@@ -48,9 +47,9 @@
         <button class="google-button">Continue with Google</button>
 
         <p class="signin-link">
-          Don’t have an account? <a href="sign-up.html">Sign Up</a>
+          Don't have an account? <a href="index.php?command=signup">Sign Up</a>
         </p>
       </section>
     </main>
   </body>
-</html>
+</html> 

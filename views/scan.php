@@ -17,7 +17,7 @@
   <!-- Top Navbar -->
   <header class="top-navbar navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid">
-      <!-- Hamburger menu for smaller screen sizes -->
+      <!-- Hamburger menu for small screens -->
       <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sideMenuDropdown" aria-controls="sideMenuDropdown" aria-expanded="false" aria-label="Toggle navigation" style="margin-right: 5px;">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -32,21 +32,28 @@
         <button class="btn btn-outline-secondary me-2" type="button" title="Cart">
           <i class="fas fa-shopping-cart"></i>
         </button>
-        <button class="btn btn-outline-secondary" type="button" title="Profile">
-          <i class="fas fa-user-circle"></i>
-        </button>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Profile">
+            <i class="fas fa-user-circle"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+            <li><span class="dropdown-item-text"><?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span></li>
+            <li><span class="dropdown-item-text text-muted"><?php echo htmlspecialchars($_SESSION['email']); ?></span></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="index.php?command=logout">Sign Out</a></li>
+          </ul>
+        </div>
       </div>
     </div>
-
-    <!-- Side menu links inside hamberger menu dropdown -->
+    <!-- Collapsible dropdown for side menu links on small screens -->
     <div class="collapse d-lg-none" id="sideMenuDropdown">
       <div class="bg-white p-2 border-top">
         <ul class="list-unstyled mb-0">
-          <li><a href="home.html" class="d-block py-1">Home</a></li>
-          <li><a href="scan.html" class="d-block py-1 active">Scan</a></li>
-          <li><a href="rewards.html" class="d-block py-1">Rewards</a></li>
-          <li><a href="transfer.html" class="d-block py-1">Transfer</a></li>
-          <li><a href="transactions.html" class="d-block py-1">Transactions</a></li>
+          <li><a href="index.php?command=home" class="d-block py-1 active">Home</a></li>
+          <li><a href="index.php?command=scan" class="d-block py-1">Scan</a></li>
+          <li><a href="index.php?command=rewards" class="d-block py-1">Rewards</a></li>
+          <li><a href="index.php?command=transfer" class="d-block py-1">Transfer</a></li>
+          <li><a href="index.php?command=transactions" class="d-block py-1">Transactions</a></li>
         </ul>
       </div>
     </div>
@@ -56,11 +63,11 @@
   <div id="wrapper" class="d-flex">
     <nav id="sidebar" class="bg-light border-end d-none d-lg-block">
       <div class="list-group list-group-flush">
-        <a href="home.html" class="list-group-item list-group-item-action">Home</a>
-        <a href="scan.html" class="list-group-item list-group-item-action active">Scan</a>
-        <a href="rewards.html" class="list-group-item list-group-item-action">Rewards</a>
-        <a href="transfer.html" class="list-group-item list-group-item-action">Transfer</a>
-        <a href="transactions.html" class="list-group-item list-group-item-action">Transactions</a>
+        <a href="index.php?command=home" class="list-group-item list-group-item-action">Home</a>
+        <a href="index.php?command=scan" class="list-group-item list-group-item-action active">Scan</a>
+        <a href="index.php?command=rewards" class="list-group-item list-group-item-action">Rewards</a>
+        <a href="index.php?command=transfer" class="list-group-item list-group-item-action">Transfer</a>
+        <a href="index.php?command=transactions" class="list-group-item list-group-item-action">Transactions</a>
       </div>
     </nav>
 
@@ -83,4 +90,4 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html> 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="author" content="Kyle Vitayanuvatti">
     <title>FastRewards - Sign Up</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="sign-up.css" />
   </head>
   <body>
@@ -15,44 +17,32 @@
       <section class="signup-container">
         <h2>Sign Up</h2>
 
-        <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+        <?php if (isset($message) && !empty($message)): ?>
+            <div class="alert alert-danger"><?php echo $message; ?></div>
+        <?php endif; ?>
+
+        <form action="index.php?command=processSignUp" method="post">
           <div class="name-row">
             <div class="form-field">
               <label for="firstName">First Name</label>
               <input
                 id="firstName"
-                formControlName="firstName"
+                name="firstName"
                 type="text"
                 placeholder="First Name"
+                required
               />
-              <div
-                class="error"
-                *ngIf="
-                  signUpForm.get('firstName')?.touched &&
-                  signUpForm.get('firstName')?.invalid
-                "
-              >
-                First name is required
-              </div>
             </div>
 
             <div class="form-field">
               <label for="lastName">Last Name</label>
               <input
                 id="lastName"
-                formControlName="lastName"
+                name="lastName"
                 type="text"
                 placeholder="Last Name"
+                required
               />
-              <div
-                class="error"
-                *ngIf="
-                  signUpForm.get('lastName')?.touched &&
-                  signUpForm.get('lastName')?.invalid
-                "
-              >
-                Last name is required
-              </div>
             </div>
           </div>
 
@@ -61,19 +51,11 @@
             <label for="email">Email</label>
             <input
               id="email"
-              formControlName="email"
+              name="email"
               type="email"
               placeholder="Email"
+              required
             />
-            <div
-              class="error"
-              *ngIf="
-                signUpForm.get('email')?.touched &&
-                signUpForm.get('email')?.invalid
-              "
-            >
-              Please enter a valid email
-            </div>
           </div>
 
           <!-- Password field -->
@@ -81,19 +63,12 @@
             <label for="password">Password</label>
             <input
               id="password"
-              formControlName="password"
+              name="password"
               type="password"
               placeholder="Password"
+              required
+              minlength="6"
             />
-            <div
-              class="error"
-              *ngIf="
-                signUpForm.get('password')?.touched &&
-                signUpForm.get('password')?.invalid
-              "
-            >
-              Password must be at least 6 characters
-            </div>
           </div>
 
           <!-- Sign up button -->
@@ -109,9 +84,9 @@
         <button class="google-button">Continue with Google</button>
 
         <p class="signin-link">
-          Have an account? <a href="index.html">Sign In</a>
+          Have an account? <a href="index.php?command=signin">Sign In</a>
         </p>
       </section>
     </main>
   </body>
-</html>
+</html> 
