@@ -40,8 +40,14 @@ switch($command) {
     case 'transfer':
         $controller->showTransfer();
         break;
+    case 'processTransfer':
+        $controller->processTransfer();
+        break;
     case 'transactions':
         $controller->showTransactions();
+        break;
+    case 'getTransactionsJson':
+        $controller->getTransactionsJson();
         break;
     case 'logout':
         $controller->logout();
