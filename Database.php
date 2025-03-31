@@ -4,6 +4,7 @@
  *
  * Contains connection information to query PostgresSQL.
  */
+require_once 'Config.php';
 
 class Database {
     private $dbConnector;
