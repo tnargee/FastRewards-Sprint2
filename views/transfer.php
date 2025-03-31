@@ -74,52 +74,229 @@
 
     <div id="page-content-wrapper">
       <div class="container-fluid transfer-content">
-        <section class="transfer-section mb-4">
-          <div class="row text-center">
-            <div class="col-md-4 transfer-col">
-              <img src="assets/mcd.png" alt="McDonald's Logo" class="transfer-restaurant-logo">
-              <select class="form-select mb-2">
-                <option>McDonald's</option>
-                <option>Chipotle</option>
-                <option>Starbucks</option>
-              </select>
-              <p>Current Balance: 4500 pts</p>
-              <label for="transferAmount" class="form-label">Enter Transfer Amount:</label>
-              <input type="number" class="form-control" id="transferAmount" placeholder="Amount">
-            </div>
-
-            <div class="col-md-4 transfer-col d-flex flex-column justify-content-center">
-              <p class="conversion-rate mb-2">Conversion Rate: 1:0.5</p>
-              <i class="fas fa-arrow-right fa-3x mb-2"></i>
-              <p class="receive-label mb-3">You will receive 250 Chipotle Points</p>
-              <button class="btn btn-primary">Transfer</button>
-            </div>
-
-            <div class="col-md-4 transfer-col">
-              <img src="assets/chipotle.png" alt="Chipotle Logo" class="transfer-restaurant-logo">
-              <select class="form-select mb-2">
-                <option>Chipotle</option>
-                <option>McDonald's</option>
-                <option>Starbucks</option>
-              </select>
-              <p>Current Balance: 300 pts</p>
-              <p>New Balance: 550 pts</p>
-            </div>
+      
+        <?php if(isset($message) && !empty($message)): ?>
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <?php echo $message; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
+        <?php endif; ?>
+        
+        <section class="transfer-section mb-4">
+          <form action="index.php?command=processTransfer" method="POST" id="transferForm">
+            <div class="row text-center">
+              <div class="col-md-4 transfer-col">
+                <div id="fromRestaurantLogo">
+                  <?php 
+                    $firstRestaurantId = reset($restaurants)['id'] ?? 0;
+                    $firstRestaurantLogo = reset($restaurants)['logo_path'] ?? '';
+                    echo '<img src="' . htmlspecialchars($firstRestaurantLogo) . '" alt="Restaurant Logo" class="transfer-restaurant-logo">';
+                  ?>
+                </div>
+                
+                <select class="form-select mb-2" name="from_restaurant" id="fromRestaurant" required>
+                  <?php foreach($restaurants as $restaurant): ?>
+                    <option value="<?php echo htmlspecialchars($restaurant['id']); ?>" 
+                            data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
+                            data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>">
+                      <?php echo htmlspecialchars($restaurant['name']); ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                
+                <p id="fromPoints">Current Balance: 
+                  <span>
+                    <?php echo htmlspecialchars($pointBalances[$firstRestaurantId]['points'] ?? 0); ?> pts
+                  </span>
+                </p>
+                
+                <label for="transferAmount" class="form-label">Enter Transfer Amount:</label>
+                <input type="number" class="form-control" id="transferAmount" name="points" placeholder="Amount" required min="1">
+              </div>
+
+              <div class="col-md-4 transfer-col d-flex flex-column justify-content-center">
+                <p class="conversion-rate mb-2">Conversion Rate: 1:0.5</p>
+                <i class="fas fa-arrow-right fa-3x mb-2"></i>
+                <p class="receive-label mb-3" id="receivedPoints">You will receive 0 points</p>
+                <button type="submit" class="btn btn-primary">Transfer</button>
+              </div>
+
+              <div class="col-md-4 transfer-col">
+                <div id="toRestaurantLogo">
+                  <?php 
+                    $secondRestaurantId = next($restaurants)['id'] ?? 0;
+                    $secondRestaurantLogo = current($restaurants)['logo_path'] ?? '';
+                    echo '<img src="' . htmlspecialchars($secondRestaurantLogo) . '" alt="Restaurant Logo" class="transfer-restaurant-logo">';
+                  ?>
+                </div>
+                
+                <select class="form-select mb-2" name="to_restaurant" id="toRestaurant" required>
+                  <?php foreach($restaurants as $restaurant): ?>
+                    <option value="<?php echo htmlspecialchars($restaurant['id']); ?>"
+                            data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
+                            data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>"
+                            <?php echo ($restaurant['id'] == $secondRestaurantId) ? 'selected' : ''; ?>>
+                      <?php echo htmlspecialchars($restaurant['name']); ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                
+                <p id="toPoints">Current Balance: 
+                  <span>
+                    <?php echo htmlspecialchars($pointBalances[$secondRestaurantId]['points'] ?? 0); ?> pts
+                  </span>
+                </p>
+                
+                <p id="newBalance">New Balance: <span>0 pts</span></p>
+              </div>
+            </div>
+          </form>
         </section>
 
         <section class="recent-transfers">
           <h5>Recent Transfers</h5>
-          <ul class="list-group">
-            <li class="list-group-item">08/20/2025: Transferred 500 pts from McDonald's to Chipotle</li>
-            <li class="list-group-item">08/15/2025: Transferred 300 pts from McDonald's to Starbucks</li>
-            <li class="list-group-item">08/10/2025: Transferred 200 pts from Starbucks to Chipotle</li>
-          </ul>
+          <?php if(empty($recentTransfers)): ?>
+            <p>No recent transfers.</p>
+          <?php else: ?>
+            <ul class="list-group">
+              <?php foreach($recentTransfers as $transfer): ?>
+                <li class="list-group-item">
+                  <?php echo date('m/d/Y', strtotime($transfer['created_at'])); ?>: 
+                  Transferred <?php echo htmlspecialchars($transfer['points_transferred']); ?> pts 
+                  from <?php echo htmlspecialchars($transfer['from_restaurant_name']); ?> 
+                  to <?php echo htmlspecialchars($transfer['to_restaurant_name']); ?>
+                  (Received <?php echo htmlspecialchars($transfer['points_received']); ?> pts)
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
+          
+          <div class="mt-3">
+            <a href="index.php?command=transactions" class="btn btn-outline-secondary btn-sm">
+              View All Transactions
+            </a>
+            <button id="getJsonData" class="btn btn-outline-secondary btn-sm">
+              Get JSON Data
+            </button>
+          </div>
+          
+          <div id="jsonResponse" class="mt-3 p-3 bg-light" style="display: none;">
+            <pre id="jsonData"></pre>
+          </div>
         </section>
       </div>
     </div>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Transfer form dynamic calculations
+    document.addEventListener('DOMContentLoaded', function() {
+      const fromRestaurant = document.getElementById('fromRestaurant');
+      const toRestaurant = document.getElementById('toRestaurant');
+      const transferAmount = document.getElementById('transferAmount');
+      const fromPoints = document.getElementById('fromPoints').querySelector('span');
+      const toPoints = document.getElementById('toPoints').querySelector('span');
+      const newBalance = document.getElementById('newBalance').querySelector('span');
+      const receivedPoints = document.getElementById('receivedPoints');
+      const fromRestaurantLogo = document.getElementById('fromRestaurantLogo');
+      const toRestaurantLogo = document.getElementById('toRestaurantLogo');
+      const conversionRate = 0.5; // Example conversion rate
+      
+      function updateLogos() {
+        // Update from restaurant logo
+        const fromLogo = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-logo');
+        fromRestaurantLogo.innerHTML = `<img src="${fromLogo}" alt="From Restaurant Logo" class="transfer-restaurant-logo">`;
+        
+        // Update to restaurant logo
+        const toLogo = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-logo');
+        toRestaurantLogo.innerHTML = `<img src="${toLogo}" alt="To Restaurant Logo" class="transfer-restaurant-logo">`;
+      }
+      
+      function updatePointDisplay() {
+        // Update points display
+        fromPoints.textContent = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
+        toPoints.textContent = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
+        
+        // Calculate received points
+        const amount = parseInt(transferAmount.value) || 0;
+        const received = Math.floor(amount * conversionRate);
+        receivedPoints.textContent = `You will receive ${received} points`;
+        
+        // Calculate new balance
+        const currentToPoints = parseInt(toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points')) || 0;
+        newBalance.textContent = (currentToPoints + received) + ' pts';
+      }
+      
+      // Add event listeners
+      fromRestaurant.addEventListener('change', function() {
+        updateLogos();
+        updatePointDisplay();
+      });
+      
+      toRestaurant.addEventListener('change', function() {
+        updateLogos();
+        updatePointDisplay();
+      });
+      
+      transferAmount.addEventListener('input', updatePointDisplay);
+      
+      // Form validation
+      document.getElementById('transferForm').addEventListener('submit', function(e) {
+        const fromId = parseInt(fromRestaurant.value);
+        const toId = parseInt(toRestaurant.value);
+        
+        if (fromId === toId) {
+          alert('Cannot transfer points to the same restaurant');
+          e.preventDefault();
+          return false;
+        }
+        
+        const amount = parseInt(transferAmount.value) || 0;
+        const availablePoints = parseInt(fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points')) || 0;
+        
+        if (amount <= 0) {
+          alert('Please enter a positive number of points');
+          e.preventDefault();
+          return false;
+        }
+        
+        if (amount > availablePoints) {
+          alert('Not enough points available for transfer');
+          e.preventDefault();
+          return false;
+        }
+        
+        return true;
+      });
+      
+      // Initial update
+      updateLogos();
+      updatePointDisplay();
+      
+      // JSON data fetching
+      document.getElementById('getJsonData').addEventListener('click', function() {
+        const jsonResponse = document.getElementById('jsonResponse');
+        const jsonData = document.getElementById('jsonData');
+        
+        // Toggle visibility
+        if (jsonResponse.style.display === 'none') {
+          // Fetch JSON data
+          fetch('index.php?command=getTransactionsJson')
+            .then(response => response.json())
+            .then(data => {
+              jsonData.textContent = JSON.stringify(data, null, 2);
+              jsonResponse.style.display = 'block';
+            })
+            .catch(error => {
+              jsonData.textContent = 'Error fetching data: ' + error;
+              jsonResponse.style.display = 'block';
+            });
+        } else {
+          jsonResponse.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html> 

@@ -99,47 +99,18 @@
           <!-- Current Points Row -->
           <h4 class="mb-3">Current Points</h4>
           <div class="row mb-4">
-            <!-- Left card with brand + points -->
+            <?php foreach ($pointBalances as $restaurantId => $balance): ?>
             <div class="col-md-3 mb-3">
               <div class="current-points-card">
                 <img
-                  src="assets/mcd.png"
-                  alt="McDonald's Logo"
+                  src="<?php echo htmlspecialchars($balance['logo_path']); ?>"
+                  alt="<?php echo htmlspecialchars($balance['restaurant_name']); ?> Logo"
                   class="brand-logo"
                 />
-                4500 Pts
+                <?php echo htmlspecialchars($balance['points']); ?> Pts
               </div>
             </div>
-            <div class="col-md-3 mb-3">
-              <div class="current-points-card">
-                <img
-                  src="assets/chipotle.png"
-                  alt="Chipotle Logo"
-                  class="brand-logo"
-                />
-                300 Pts
-              </div>
-            </div>
-            <div class="col-md-3 mb-3">
-              <div class="current-points-card">
-                <img
-                  src="assets/starbucks.png"
-                  alt="Starbucks Logo"
-                  class="brand-logo"
-                />
-                2500 Pts
-              </div>
-            </div>
-            <div class="col-md-3 mb-3">
-              <div class="current-points-card">
-                <img
-                  src="assets/wawa.png"
-                  alt="Wawa Logo"
-                  class="brand-logo"
-                />
-                500 Pts
-              </div>
-            </div>
+            <?php endforeach; ?>
           </div>
 
           <!-- Deals Section -->
