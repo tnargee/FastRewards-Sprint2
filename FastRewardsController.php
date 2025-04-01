@@ -194,7 +194,7 @@ class FastRewardsController {
                 $defaultPoints = [
                     1 => 4500, // McDonald's
                     2 => 300,  // Chipotle
-                    3 => 2500, // Starbucks
+                    3 => 2500,  // Starbucks
                     4 => 500   // Wawa
                 ];
                 

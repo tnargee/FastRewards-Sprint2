@@ -86,7 +86,7 @@
           <form action="index.php?command=processTransfer" method="POST" id="transferForm">
             <div class="row text-center">
               <div class="col-md-4 transfer-col">
-                <div id="fromRestaurantLogo">
+                <div id="fromRestaurantLogo" class="transfer-logo-container">
                   <?php 
                     $firstRestaurantId = reset($restaurants)['id'] ?? 0;
                     $firstRestaurantLogo = reset($restaurants)['logo_path'] ?? '';
@@ -94,35 +94,37 @@
                   ?>
                 </div>
                 
-                <select class="form-select mb-2" name="from_restaurant" id="fromRestaurant" required>
-                  <?php foreach($restaurants as $restaurant): ?>
-                    <option value="<?php echo htmlspecialchars($restaurant['id']); ?>" 
-                            data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
-                            data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>">
-                      <?php echo htmlspecialchars($restaurant['name']); ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-                
-                <p id="fromPoints">Current Balance: 
-                  <span>
-                    <?php echo htmlspecialchars($pointBalances[$firstRestaurantId]['points'] ?? 0); ?> pts
-                  </span>
-                </p>
-                
-                <label for="transferAmount" class="form-label">Enter Transfer Amount:</label>
-                <input type="number" class="form-control" id="transferAmount" name="points" placeholder="Amount" required min="1">
+                <div class="transfer-controls">
+                  <select class="form-select mb-2" name="from_restaurant" id="fromRestaurant" required>
+                    <?php foreach($restaurants as $restaurant): ?>
+                      <option value="<?php echo htmlspecialchars($restaurant['id']); ?>" 
+                              data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
+                              data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>">
+                        <?php echo htmlspecialchars($restaurant['name']); ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                  
+                  <p id="fromPoints">Current Balance: 
+                    <span>
+                      <?php echo htmlspecialchars($pointBalances[$firstRestaurantId]['points'] ?? 0); ?> pts
+                    </span>
+                  </p>
+                  
+                  <label for="transferAmount" class="form-label">Enter Transfer Amount:</label>
+                  <input type="number" class="form-control" id="transferAmount" name="points" placeholder="Amount" required min="1">
+                </div>
               </div>
 
               <div class="col-md-4 transfer-col d-flex flex-column justify-content-center">
-                <p class="conversion-rate mb-2">Conversion Rate: 1:0.5</p>
+                <p class="conversion-rate mb-2" id="conversionRate">Conversion Rate: 1:0.5</p>
                 <i class="fas fa-arrow-right fa-3x mb-2"></i>
                 <p class="receive-label mb-3" id="receivedPoints">You will receive 0 points</p>
                 <button type="submit" class="btn btn-primary">Transfer</button>
               </div>
 
               <div class="col-md-4 transfer-col">
-                <div id="toRestaurantLogo">
+                <div id="toRestaurantLogo" class="transfer-logo-container">
                   <?php 
                     $secondRestaurantId = next($restaurants)['id'] ?? 0;
                     $secondRestaurantLogo = current($restaurants)['logo_path'] ?? '';
@@ -130,24 +132,28 @@
                   ?>
                 </div>
                 
-                <select class="form-select mb-2" name="to_restaurant" id="toRestaurant" required>
-                  <?php foreach($restaurants as $restaurant): ?>
-                    <option value="<?php echo htmlspecialchars($restaurant['id']); ?>"
-                            data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
-                            data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>"
-                            <?php echo ($restaurant['id'] == $secondRestaurantId) ? 'selected' : ''; ?>>
-                      <?php echo htmlspecialchars($restaurant['name']); ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-                
-                <p id="toPoints">Current Balance: 
-                  <span>
-                    <?php echo htmlspecialchars($pointBalances[$secondRestaurantId]['points'] ?? 0); ?> pts
-                  </span>
-                </p>
-                
-                <p id="newBalance">New Balance: <span>0 pts</span></p>
+                <div class="transfer-controls">
+                  <select class="form-select mb-2" name="to_restaurant" id="toRestaurant" required>
+                    <?php foreach($restaurants as $restaurant): ?>
+                      <?php if($restaurant['id'] != $firstRestaurantId): ?>
+                        <option value="<?php echo htmlspecialchars($restaurant['id']); ?>"
+                                data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
+                                data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>"
+                                <?php echo ($restaurant['id'] == $secondRestaurantId) ? 'selected' : ''; ?>>
+                          <?php echo htmlspecialchars($restaurant['name']); ?>
+                        </option>
+                      <?php endif; ?>
+                    <?php endforeach; ?>
+                  </select>
+                  
+                  <p id="toPoints">Current Balance: 
+                    <span>
+                      <?php echo htmlspecialchars($pointBalances[$secondRestaurantId]['points'] ?? 0); ?> pts
+                    </span>
+                  </p>
+                  
+                  <p id="newBalance">New Balance: <span>0 pts</span></p>
+                </div>
               </div>
             </div>
           </form>
@@ -199,80 +205,96 @@
       const toPoints = document.getElementById('toPoints').querySelector('span');
       const newBalance = document.getElementById('newBalance').querySelector('span');
       const receivedPoints = document.getElementById('receivedPoints');
-      const fromRestaurantLogo = document.getElementById('fromRestaurantLogo');
-      const toRestaurantLogo = document.getElementById('toRestaurantLogo');
-      const conversionRate = 0.5; // Example conversion rate
-      
-      function updateLogos() {
-        // Update from restaurant logo
-        const fromLogo = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-logo');
-        fromRestaurantLogo.innerHTML = `<img src="${fromLogo}" alt="From Restaurant Logo" class="transfer-restaurant-logo">`;
+      const conversionRate = document.getElementById('conversionRate');
+      const fromLogo = document.getElementById('fromRestaurantLogo');
+      const toLogo = document.getElementById('toRestaurantLogo');
+
+      // Define conversion rates between restaurants
+      const conversionRates = {
+        '1-2': 0.5,  // McDonald's to Chipotle
+        '2-1': 2.0,  // Chipotle to McDonald's
+        '1-3': 0.75, // McDonald's to Starbucks
+        '3-1': 1.33, // Starbucks to McDonald's
+        '1-4': 0.6,  // McDonald's to Wawa
+        '4-1': 1.67, // Wawa to McDonald's
+        '2-3': 1.5,  // Chipotle to Starbucks
+        '3-2': 0.67, // Starbucks to Chipotle
+        '2-4': 1.2,  // Chipotle to Wawa
+        '4-2': 0.83, // Wawa to Chipotle
+        '3-4': 0.8,  // Starbucks to Wawa
+        '4-3': 1.25  // Wawa to Starbucks
+      };
+
+      function updateToRestaurantOptions() {
+        const fromId = fromRestaurant.value;
+        const currentToId = toRestaurant.value;
         
-        // Update to restaurant logo
-        const toLogo = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-logo');
-        toRestaurantLogo.innerHTML = `<img src="${toLogo}" alt="To Restaurant Logo" class="transfer-restaurant-logo">`;
+        // Clear current options
+        toRestaurant.innerHTML = '';
+        
+        // Add new options excluding the selected "from" restaurant
+        Array.from(fromRestaurant.options).forEach(option => {
+          if (option.value !== fromId) {
+            const newOption = document.createElement('option');
+            newOption.value = option.value;
+            newOption.dataset.logo = option.dataset.logo;
+            newOption.dataset.points = option.dataset.points;
+            newOption.textContent = option.textContent;
+            toRestaurant.appendChild(newOption);
+          }
+        });
+        
+        // If the current "to" restaurant was the same as the new "from" restaurant,
+        // select the first available option
+        if (currentToId === fromId) {
+          toRestaurant.selectedIndex = 0;
+        }
+        
+        updateLogos();
       }
-      
-      function updatePointDisplay() {
-        // Update points display
-        fromPoints.textContent = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
-        toPoints.textContent = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
+
+      function updateConversionRate() {
+        const fromId = fromRestaurant.value;
+        const toId = toRestaurant.value;
+        const rate = conversionRates[`${fromId}-${toId}`] || 1;
         
-        // Calculate received points
+        conversionRate.textContent = `Conversion Rate: 1:${rate}`;
+        updateReceivedPoints(rate);
+      }
+
+      function updateReceivedPoints(rate) {
         const amount = parseInt(transferAmount.value) || 0;
-        const received = Math.floor(amount * conversionRate);
+        const received = Math.floor(amount * rate);
         receivedPoints.textContent = `You will receive ${received} points`;
         
-        // Calculate new balance
-        const currentToPoints = parseInt(toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points')) || 0;
-        newBalance.textContent = (currentToPoints + received) + ' pts';
+        const currentToPoints = parseInt(toPoints.textContent);
+        newBalance.textContent = `${currentToPoints + received} pts`;
       }
-      
-      // Add event listeners
-      fromRestaurant.addEventListener('change', function() {
-        updateLogos();
-        updatePointDisplay();
+
+      function updateLogos() {
+        const fromOption = fromRestaurant.options[fromRestaurant.selectedIndex];
+        const toOption = toRestaurant.options[toRestaurant.selectedIndex];
+        
+        fromLogo.innerHTML = `<img src="${fromOption.dataset.logo}" alt="Restaurant Logo" class="transfer-restaurant-logo">`;
+        toLogo.innerHTML = `<img src="${toOption.dataset.logo}" alt="Restaurant Logo" class="transfer-restaurant-logo">`;
+        
+        fromPoints.textContent = `${fromOption.dataset.points} pts`;
+        toPoints.textContent = `${toOption.dataset.points} pts`;
+        
+        updateConversionRate();
+      }
+
+      fromRestaurant.addEventListener('change', updateToRestaurantOptions);
+      toRestaurant.addEventListener('change', updateLogos);
+      transferAmount.addEventListener('input', function() {
+        const fromId = fromRestaurant.value;
+        const toId = toRestaurant.value;
+        const rate = conversionRates[`${fromId}-${toId}`] || 1;
+        updateReceivedPoints(rate);
       });
-      
-      toRestaurant.addEventListener('change', function() {
-        updateLogos();
-        updatePointDisplay();
-      });
-      
-      transferAmount.addEventListener('input', updatePointDisplay);
-      
-      // Form validation
-      document.getElementById('transferForm').addEventListener('submit', function(e) {
-        const fromId = parseInt(fromRestaurant.value);
-        const toId = parseInt(toRestaurant.value);
-        
-        if (fromId === toId) {
-          alert('Cannot transfer points to the same restaurant');
-          e.preventDefault();
-          return false;
-        }
-        
-        const amount = parseInt(transferAmount.value) || 0;
-        const availablePoints = parseInt(fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points')) || 0;
-        
-        if (amount <= 0) {
-          alert('Please enter a positive number of points');
-          e.preventDefault();
-          return false;
-        }
-        
-        if (amount > availablePoints) {
-          alert('Not enough points available for transfer');
-          e.preventDefault();
-          return false;
-        }
-        
-        return true;
-      });
-      
+
       // Initial update
-      updateLogos();
-      updatePointDisplay();
+      updateToRestaurantOptions();
       
       // JSON data fetching
       document.getElementById('getJsonData').addEventListener('click', function() {
@@ -298,5 +320,34 @@
       });
     });
   </script>
+
+  <style>
+    .transfer-logo-container {
+      height: 200px;  /* Increased from 150px */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .transfer-restaurant-logo {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .transfer-controls {
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .transfer-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
 </body>
 </html> 
