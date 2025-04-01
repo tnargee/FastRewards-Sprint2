@@ -1,9 +1,10 @@
 <?php
+// Author: Tenzin Nargee
+// URL: https://cs4640.cs.virginia.edu/ghf3ky/sprint3/index.php
+
 // Enable error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
-// URL: https://cs4640.cs.virginia.edu/ghf3ky/sprint3/index.php
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {

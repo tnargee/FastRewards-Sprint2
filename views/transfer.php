@@ -84,6 +84,12 @@
         
         <section class="transfer-section mb-4">
           <form action="index.php?command=processTransfer" method="POST" id="transferForm">
+            <!-- Add hidden fields for state maintenance -->
+            <input type="hidden" name="previous_from_restaurant" value="<?php echo isset($_POST['from_restaurant']) ? htmlspecialchars($_POST['from_restaurant']) : ''; ?>">
+            <input type="hidden" name="previous_to_restaurant" value="<?php echo isset($_POST['to_restaurant']) ? htmlspecialchars($_POST['to_restaurant']) : ''; ?>">
+            <input type="hidden" name="previous_amount" value="<?php echo isset($_POST['points']) ? htmlspecialchars($_POST['points']) : ''; ?>">
+            <input type="hidden" name="transfer_count" value="<?php echo isset($_POST['transfer_count']) ? intval($_POST['transfer_count']) + 1 : 1; ?>">
+            
             <div class="row text-center">
               <div class="col-md-4 transfer-col">
                 <div id="fromRestaurantLogo" class="transfer-logo-container">

@@ -1,4 +1,6 @@
 <?php
+// Author: Tenzin Nargee, Kyle Vitayanuvatti
+
 require_once 'Database.php';
 require_once 'Config.php';
 

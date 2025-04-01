@@ -1,4 +1,6 @@
 <?php
+// Author: Tenzin Nargee, Kyle Vitayanuvatti
+
 /**
  * Configuration information
  * CS4640 Spring 2024

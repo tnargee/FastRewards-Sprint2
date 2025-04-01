@@ -1,4 +1,6 @@
 <?php
+// Author: Tenzin Nargee, Kyle Vitayanuvatti
+
 /**
  * Database Class
  *
