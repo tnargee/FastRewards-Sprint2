@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="js-styles.css">
 </head>
 <body>
   <!-- Top Navbar -->
@@ -88,15 +89,18 @@
             </div>
           </div>
           <div class="col-md-3">
-            <select class="form-select" id="filterType">
-              <option value="">All Transactions</option>
-              <option value="points-transfer">Points Transfer</option>
-              <option value="points-earned">Points Earned</option>
-              <option value="points-redeemed">Points Redeemed</option>
+            <select class="form-select" id="transaction-filter">
+              <option value="all">All Transactions</option>
+              <option value="transfer">Points Transfer</option>
+              <option value="earn">Points Earned</option>
+              <option value="redeem">Points Redeemed</option>
             </select>
           </div>
           <div class="col-md-3">
-            <button id="getJsonData" class="btn btn-outline-secondary w-100">
+            <button id="refreshTransactions" class="btn btn-outline-primary me-2">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button id="getJsonData" class="btn btn-outline-secondary">
               <i class="fas fa-code me-1"></i> View as JSON
             </button>
           </div>
@@ -115,52 +119,29 @@
           </div>
         </div>
 
-        <!-- Transactions Table -->
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead class="table-light">
-              <tr>
-                <th>Date</th>
-                <th>Transaction Type</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Points</th>
-                <th>Received</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php if (empty($transactions)): ?>
-                <tr>
-                  <td colspan="6" class="text-center">No transactions found.</td>
-                </tr>
-              <?php else: ?>
-                <?php foreach ($transactions as $transaction): ?>
-                <tr>
-                  <td><?php echo date('m/d/Y', strtotime($transaction['created_at'])); ?></td>
-                  <td>Points Transfer</td>
-                  <td>
-                    <?php if($transaction['from_restaurant_id']): ?>
-                      <img src="<?php echo htmlspecialchars($transaction['from_logo_path']); ?>" alt="Restaurant Logo" height="20">
-                      <?php echo htmlspecialchars($transaction['from_restaurant_name']); ?>
-                    <?php else: ?>
-                      -
-                    <?php endif; ?>
-                  </td>
-                  <td>
-                    <?php if($transaction['to_restaurant_id']): ?>
-                      <img src="<?php echo htmlspecialchars($transaction['to_logo_path']); ?>" alt="Restaurant Logo" height="20">
-                      <?php echo htmlspecialchars($transaction['to_restaurant_name']); ?>
-                    <?php else: ?>
-                      -
-                    <?php endif; ?>
-                  </td>
-                  <td><?php echo htmlspecialchars($transaction['points_transferred']); ?></td>
-                  <td><?php echo htmlspecialchars($transaction['points_received']); ?></td>
-                </tr>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </tbody>
-          </table>
+        <!-- Transactions List - Will be populated by JavaScript -->
+        <div id="transactions-list" class="transactions-container">
+          <?php if (empty($transactions)): ?>
+            <p class="text-center">No transactions found.</p>
+          <?php else: ?>
+            <!-- Initial server-rendered transactions that will be replaced by AJAX -->
+            <?php foreach ($transactions as $transaction): ?>
+            <div class="transaction-card">
+              <div class="transaction-icon transfer-icon"></div>
+              <div class="transaction-details">
+                <h3><?php echo htmlspecialchars($transaction['from_restaurant_name'] ?? ''); ?> → <?php echo htmlspecialchars($transaction['to_restaurant_name'] ?? ''); ?></h3>
+                <p class="transaction-date"><?php echo date('M d, Y, h:i A', strtotime($transaction['created_at'])); ?></p>
+              </div>
+              <div class="transaction-points">
+                <p class="points transfer">Transferred: <?php echo htmlspecialchars($transaction['points_transferred']); ?> points</p>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+        
+        <div class="text-center mt-4 mb-5">
+          <button id="loadMoreTransactions" class="btn btn-outline-primary">Load More</button>
         </div>
       </div>
     </div>
@@ -168,66 +149,109 @@
 
   <!-- Bootstrap Bundle JS  -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- jQuery for AJAX -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Our JavaScript files -->
+  <script src="js/validation.js"></script>
+  <script src="js/dom-manipulator.js"></script>
+  <script src="js/ajax.js"></script>
+  <script src="js/app.js"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // JSON data handling
-      const getJsonDataBtn = document.getElementById('getJsonData');
-      const jsonDisplay = document.getElementById('jsonDisplay');
-      const closeJsonDisplay = document.getElementById('closeJsonDisplay');
-      const jsonData = document.getElementById('jsonData');
-      
-      getJsonDataBtn.addEventListener('click', function() {
-        // Toggle JSON display
-        if (jsonDisplay.style.display === 'none') {
-          // Fetch JSON data from API
-          fetch('index.php?command=getTransactionsJson')
-            .then(response => response.json())
-            .then(data => {
-              jsonData.textContent = JSON.stringify(data, null, 2);
-              jsonDisplay.style.display = 'block';
-            })
-            .catch(error => {
-              jsonData.textContent = 'Error fetching data: ' + error;
-              jsonDisplay.style.display = 'block';
-            });
-        } else {
-          jsonDisplay.style.display = 'none';
-        }
-      });
-      
-      closeJsonDisplay.addEventListener('click', function() {
-        jsonDisplay.style.display = 'none';
-      });
-      
-      // Simple transaction search functionality
+      // Initialize search functionality
       const searchInput = document.getElementById('searchTransactions');
       const searchButton = document.getElementById('searchButton');
-      const filterType = document.getElementById('filterType');
-      const tableRows = document.querySelectorAll('tbody tr');
       
-      function filterTable() {
+      function performSearch() {
         const searchTerm = searchInput.value.toLowerCase();
-        const filterValue = filterType.value.toLowerCase();
+        const transactions = document.querySelectorAll('.transaction-card');
         
-        tableRows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          const transactionType = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-          
-          const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-          const matchesFilter = filterValue === '' || transactionType.includes(filterValue);
-          
-          row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+        transactions.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          if (text.includes(searchTerm)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
         });
       }
       
-      searchButton.addEventListener('click', filterTable);
-      searchInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-          filterTable();
+      searchButton.addEventListener('click', performSearch);
+      searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
         }
       });
       
-      filterType.addEventListener('change', filterTable);
+      // JSON display handling
+      const getJsonDataBtn = document.getElementById('getJsonData');
+      const jsonDisplay = document.getElementById('jsonDisplay');
+      const closeJsonDisplay = document.getElementById('closeJsonDisplay');
+      
+      getJsonDataBtn.addEventListener('click', () => {
+        toggleElementVisibility('jsonDisplay');
+        
+        if (jsonDisplay.style.display !== 'none') {
+          // Load JSON data
+          fetch('index.php?command=getTransactionsJson')
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('jsonData').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+              console.error('Error fetching JSON data:', error);
+              showNotification('Failed to load JSON data', 'error');
+            });
+        }
+      });
+      
+      closeJsonDisplay.addEventListener('click', () => {
+        jsonDisplay.style.display = 'none';
+      });
+      
+      // Refresh transactions button
+      const refreshButton = document.getElementById('refreshTransactions');
+      refreshButton.addEventListener('click', () => {
+        // Show loading animation
+        showNotification('Refreshing transactions...', 'info');
+        
+        // Use our AJAX function to load transactions
+        loadTransactions();
+      });
+      
+      // Load more transactions button
+      const loadMoreButton = document.getElementById('loadMoreTransactions');
+      let currentPage = 1;
+      
+      loadMoreButton.addEventListener('click', () => {
+        currentPage++;
+        
+        // Simulate loading more transactions
+        loadMoreButton.textContent = 'Loading...';
+        loadMoreButton.disabled = true;
+        
+        // Show loading animation
+        setTimeout(() => {
+          // This would normally fetch more data from the server
+          // For now, we'll simulate it
+          
+          loadMoreButton.textContent = 'Load More';
+          loadMoreButton.disabled = false;
+          
+          // Check if we have transactions to load
+          if (currentPage > 3) {
+            loadMoreButton.textContent = 'No more transactions';
+            loadMoreButton.disabled = true;
+            showNotification('All transactions have been loaded', 'info');
+          }
+        }, 1000);
+      });
+      
+      // Load transactions on page load
+      window.addEventListener('load', loadTransactions);
     });
   </script>
 </body>

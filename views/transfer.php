@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="transfer.css">
+  <link rel="stylesheet" href="js-styles.css">
 </head>
 <body>
   <!-- Top Navbar -->
@@ -82,8 +83,10 @@
           </div>
         <?php endif; ?>
         
+        <div id="validation-errors" class="alert alert-danger" style="display: none;"></div>
+        
         <section class="transfer-section mb-4">
-          <form action="index.php?command=processTransfer" method="POST" id="transferForm">
+          <form action="index.php?command=processTransfer" method="POST" id="transfer-form">
             <div class="row text-center">
               <div class="col-md-4 transfer-col">
                 <div id="fromRestaurantLogo">
@@ -105,13 +108,13 @@
                 </select>
                 
                 <p id="fromPoints">Current Balance: 
-                  <span>
+                  <span class="balance-<?php echo htmlspecialchars($firstRestaurantId); ?>">
                     <?php echo htmlspecialchars($pointBalances[$firstRestaurantId]['points'] ?? 0); ?> pts
                   </span>
                 </p>
                 
-                <label for="transferAmount" class="form-label">Enter Transfer Amount:</label>
-                <input type="number" class="form-control" id="transferAmount" name="points" placeholder="Amount" required min="1">
+                <label for="amount" class="form-label">Enter Transfer Amount:</label>
+                <input type="number" class="form-control" id="amount" name="points" placeholder="Amount" required min="1">
               </div>
 
               <div class="col-md-4 transfer-col d-flex flex-column justify-content-center">
@@ -142,7 +145,7 @@
                 </select>
                 
                 <p id="toPoints">Current Balance: 
-                  <span>
+                  <span class="balance-<?php echo htmlspecialchars($secondRestaurantId); ?>">
                     <?php echo htmlspecialchars($pointBalances[$secondRestaurantId]['points'] ?? 0); ?> pts
                   </span>
                 </p>
@@ -176,7 +179,7 @@
               View All Transactions
             </a>
             <button id="getJsonData" class="btn btn-outline-secondary btn-sm">
-              Get JSON Data
+              Get Transactions JSON
             </button>
           </div>
           
@@ -188,112 +191,107 @@
     </div>
   </div>
   
+  <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- jQuery for AJAX -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Our JavaScript files -->
+  <script src="js/validation.js"></script>
+  <script src="js/dom-manipulator.js"></script>
+  <script src="js/ajax.js"></script>
+  <script src="js/app.js"></script>
+  
   <script>
     // Transfer form dynamic calculations
     document.addEventListener('DOMContentLoaded', function() {
       const fromRestaurant = document.getElementById('fromRestaurant');
       const toRestaurant = document.getElementById('toRestaurant');
-      const transferAmount = document.getElementById('transferAmount');
+      const transferAmount = document.getElementById('amount');
       const fromPoints = document.getElementById('fromPoints').querySelector('span');
       const toPoints = document.getElementById('toPoints').querySelector('span');
       const newBalance = document.getElementById('newBalance').querySelector('span');
       const receivedPoints = document.getElementById('receivedPoints');
-      const fromRestaurantLogo = document.getElementById('fromRestaurantLogo');
-      const toRestaurantLogo = document.getElementById('toRestaurantLogo');
-      const conversionRate = 0.5; // Example conversion rate
+      const fromRestaurantLogo = document.getElementById('fromRestaurantLogo').querySelector('img');
+      const toRestaurantLogo = document.getElementById('toRestaurantLogo').querySelector('img');
       
-      function updateLogos() {
-        // Update from restaurant logo
-        const fromLogo = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-logo');
-        fromRestaurantLogo.innerHTML = `<img src="${fromLogo}" alt="From Restaurant Logo" class="transfer-restaurant-logo">`;
-        
-        // Update to restaurant logo
-        const toLogo = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-logo');
-        toRestaurantLogo.innerHTML = `<img src="${toLogo}" alt="To Restaurant Logo" class="transfer-restaurant-logo">`;
-      }
-      
-      function updatePointDisplay() {
-        // Update points display
-        fromPoints.textContent = fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
-        toPoints.textContent = toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points') + ' pts';
-        
-        // Calculate received points
+      // Calculate points on input change
+      function calculatePoints() {
         const amount = parseInt(transferAmount.value) || 0;
+        const conversionRate = 0.5; // 50% conversion rate
         const received = Math.floor(amount * conversionRate);
+        
         receivedPoints.textContent = `You will receive ${received} points`;
         
-        // Calculate new balance
-        const currentToPoints = parseInt(toRestaurant.options[toRestaurant.selectedIndex].getAttribute('data-points')) || 0;
-        newBalance.textContent = (currentToPoints + received) + ' pts';
+        // Update new balance preview
+        const currentToPoints = parseInt(toPoints.textContent) || 0;
+        newBalance.textContent = `${currentToPoints + received} pts`;
+        
+        // Validate that user has enough points
+        const currentFromPoints = parseInt(fromPoints.textContent) || 0;
+        if (amount > currentFromPoints) {
+          transferAmount.classList.add('invalid-input');
+          showNotification('You don\'t have enough points for this transfer', 'error');
+        } else {
+          transferAmount.classList.remove('invalid-input');
+        }
+      }
+      
+      // Update restaurant logos and point balances when selections change
+      function updateFromRestaurant() {
+        const selectedOption = fromRestaurant.options[fromRestaurant.selectedIndex];
+        const logo = selectedOption.getAttribute('data-logo');
+        const points = selectedOption.getAttribute('data-points');
+        
+        fromRestaurantLogo.src = logo;
+        fromPoints.textContent = `${points} pts`;
+        fromPoints.className = `balance-${fromRestaurant.value}`;
+        
+        calculatePoints();
+      }
+      
+      function updateToRestaurant() {
+        const selectedOption = toRestaurant.options[toRestaurant.selectedIndex];
+        const logo = selectedOption.getAttribute('data-logo');
+        const points = selectedOption.getAttribute('data-points');
+        
+        toRestaurantLogo.src = logo;
+        toPoints.textContent = `${points} pts`;
+        toPoints.className = `balance-${toRestaurant.value}`;
+        
+        calculatePoints();
       }
       
       // Add event listeners
-      fromRestaurant.addEventListener('change', function() {
-        updateLogos();
-        updatePointDisplay();
-      });
+      fromRestaurant.addEventListener('change', updateFromRestaurant);
+      toRestaurant.addEventListener('change', updateToRestaurant);
+      transferAmount.addEventListener('input', calculatePoints);
       
-      toRestaurant.addEventListener('change', function() {
-        updateLogos();
-        updatePointDisplay();
-      });
+      // Initialize points calculation
+      calculatePoints();
       
-      transferAmount.addEventListener('input', updatePointDisplay);
+      // AJAX for getting transaction data
+      const getJsonDataBtn = document.getElementById('getJsonData');
+      const jsonResponse = document.getElementById('jsonResponse');
+      const jsonData = document.getElementById('jsonData');
       
-      // Form validation
-      document.getElementById('transferForm').addEventListener('submit', function(e) {
-        const fromId = parseInt(fromRestaurant.value);
-        const toId = parseInt(toRestaurant.value);
-        
-        if (fromId === toId) {
-          alert('Cannot transfer points to the same restaurant');
-          e.preventDefault();
-          return false;
-        }
-        
-        const amount = parseInt(transferAmount.value) || 0;
-        const availablePoints = parseInt(fromRestaurant.options[fromRestaurant.selectedIndex].getAttribute('data-points')) || 0;
-        
-        if (amount <= 0) {
-          alert('Please enter a positive number of points');
-          e.preventDefault();
-          return false;
-        }
-        
-        if (amount > availablePoints) {
-          alert('Not enough points available for transfer');
-          e.preventDefault();
-          return false;
-        }
-        
-        return true;
-      });
-      
-      // Initial update
-      updateLogos();
-      updatePointDisplay();
-      
-      // JSON data fetching
-      document.getElementById('getJsonData').addEventListener('click', function() {
-        const jsonResponse = document.getElementById('jsonResponse');
-        const jsonData = document.getElementById('jsonData');
-        
-        // Toggle visibility
+      getJsonDataBtn.addEventListener('click', function() {
+        // Toggle visibility of JSON response area
         if (jsonResponse.style.display === 'none') {
-          // Fetch JSON data
+          // Fetch transactions data
           fetch('index.php?command=getTransactionsJson')
             .then(response => response.json())
             .then(data => {
               jsonData.textContent = JSON.stringify(data, null, 2);
-              jsonResponse.style.display = 'block';
+              toggleElementVisibility('jsonResponse');
             })
             .catch(error => {
-              jsonData.textContent = 'Error fetching data: ' + error;
-              jsonResponse.style.display = 'block';
+              console.error('Error fetching transaction data:', error);
+              showNotification('Failed to load transaction data', 'error');
             });
         } else {
-          jsonResponse.style.display = 'none';
+          toggleElementVisibility('jsonResponse');
         }
       });
     });

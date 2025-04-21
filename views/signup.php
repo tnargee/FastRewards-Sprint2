@@ -7,6 +7,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="sign-up.css" />
+    <link rel="stylesheet" href="js-styles.css" />
   </head>
   <body>
     <header class="top-header">
@@ -20,6 +21,8 @@
         <?php if (isset($message) && !empty($message)): ?>
             <div class="alert alert-danger"><?php echo $message; ?></div>
         <?php endif; ?>
+        
+        <div id="validation-errors" class="alert alert-danger" style="display: none;"></div>
 
         <form action="index.php?command=processSignUp" method="post">
           <div class="name-row">
@@ -88,5 +91,10 @@
         </p>
       </section>
     </main>
+    
+    <!-- JavaScript files -->
+    <script src="js/validation.js"></script>
+    <script src="js/dom-manipulator.js"></script>
+    <script src="js/app.js"></script>
   </body>
 </html> 
