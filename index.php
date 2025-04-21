@@ -49,6 +49,9 @@ switch($command) {
     case 'getTransactionsJson':
         $controller->getTransactionsJson();
         break;
+    case 'getPointBalancesJson':
+        $controller->getPointBalancesJson();
+        break;
     case 'logout':
         $controller->logout();
         break;
