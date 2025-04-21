@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="author" content="Tenzin Nargee">
+  <meta name="author" content="Tenzin Nargee, Kyle Vitayanuvatti">
   <title>FastRewards - Transfer Points</title>
 
   <!-- Bootstrap CSS -->

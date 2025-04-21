@@ -14,11 +14,11 @@
 
 class Config {
     public static $db = [
-        "host" => "db",
+        "host" => "localhost",
         "port" => 5432,
-        "user" => "localuser",
-        "pass" => "cs4640LocalUser!",
-        "database" => "example"
+        "user" => "ghf3ky",
+        "pass" => "g4W0voKILD0A",
+        "database" => "ghf3ky"
     ];
 }
 ?> 
