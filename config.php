@@ -1,4 +1,6 @@
 <?php
+// Author: Tenzin Nargee, Kyle Vitayanuvatti
+
 /**
  * Configuration information
  * CS4640 Spring 2024
@@ -12,11 +14,11 @@
 
 class Config {
     public static $db = [
-        "host" => "localhost",
+        "host" => "db",
         "port" => 5432,
-        "user" => "kylevitayanuvatti",
-        "pass" => "",
-        "database" => "postgres"
+        "user" => "localuser",
+        "pass" => "cs4640LocalUser!",
+        "database" => "example"
     ];
 }
 ?> 

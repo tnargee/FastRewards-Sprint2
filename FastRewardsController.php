@@ -1,4 +1,6 @@
 <?php
+// Author: Tenzin Nargee, Kyle Vitayanuvatti
+
 require_once 'Database.php';
 require_once 'Config.php';
 
@@ -116,7 +118,7 @@ class FastRewardsController {
             
             if(empty($email)) {
                 $errors[] = "Email is required.";
-            } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            } elseif(!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
                 $errors[] = "Please enter a valid email address.";
             }
             
@@ -194,7 +196,7 @@ class FastRewardsController {
                 $defaultPoints = [
                     1 => 4500, // McDonald's
                     2 => 300,  // Chipotle
-                    3 => 2500, // Starbucks
+                    3 => 2500,  // Starbucks
                     4 => 500   // Wawa
                 ];
                 
@@ -325,6 +327,12 @@ class FastRewardsController {
         
         $userId = $_SESSION['user_id'];
         
+        // Get state information from hidden fields
+        $previousFromRestaurant = isset($_POST['previous_from_restaurant']) ? $_POST['previous_from_restaurant'] : null;
+        $previousToRestaurant = isset($_POST['previous_to_restaurant']) ? $_POST['previous_to_restaurant'] : null;
+        $previousAmount = isset($_POST['previous_amount']) ? $_POST['previous_amount'] : null;
+        $transferCount = isset($_POST['transfer_count']) ? intval($_POST['transfer_count']) : 1;
+        
         // Validate form data
         if(isset($_POST['from_restaurant']) && isset($_POST['to_restaurant']) && isset($_POST['points'])) {
             $fromRestaurantId = intval($_POST['from_restaurant']);
@@ -394,7 +402,38 @@ class FastRewardsController {
                 // Commit transaction
                 $this->db->query("COMMIT");
                 
-                $_SESSION['message'] = "Successfully transferred $points points with a conversion rate of 1:$conversionRate. You received $receivedPoints points.";
+                // Get restaurant names for current transfer
+                $currentFromRestaurant = $this->db->fetch(
+                    "SELECT name FROM fastrewards_restaurants WHERE id = $1",
+                    [$fromRestaurantId]
+                );
+                $currentToRestaurant = $this->db->fetch(
+                    "SELECT name FROM fastrewards_restaurants WHERE id = $1",
+                    [$toRestaurantId]
+                );
+                
+                // Build success message with current transfer details
+                $message = "Successfully transferred $points points from " . 
+                          htmlspecialchars($currentFromRestaurant['name']) . " to " . 
+                          htmlspecialchars($currentToRestaurant['name']) . 
+                          " with a conversion rate of 1:$conversionRate. You received $receivedPoints points.";
+                
+                if ($transferCount > 1) {
+                    $fromRestaurant = $this->db->fetch(
+                        "SELECT name FROM fastrewards_restaurants WHERE id = $1",
+                        [$previousFromRestaurant]
+                    );
+                    $toRestaurant = $this->db->fetch(
+                        "SELECT name FROM fastrewards_restaurants WHERE id = $1",
+                        [$previousToRestaurant]
+                    );
+                    
+                    $message .= "<br><small class='text-muted'>Previous transfer: $previousAmount points from " . 
+                               htmlspecialchars($fromRestaurant['name']) . " to " . 
+                               htmlspecialchars($toRestaurant['name']) . "</small>";
+                }
+                
+                $_SESSION['message'] = $message;
                 header("Location: index.php?command=transfer");
                 exit();
                 

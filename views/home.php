@@ -79,29 +79,29 @@
         <!-- Quick Actions -->
         <div class="row mt-4">
           <div class="col-md-4">
-            <div class="card">
-              <div class="card-body">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
                 <h5 class="card-title">Scan Receipt</h5>
                 <p class="card-text">Upload a receipt or scan a QR code to earn points.</p>
-                <a href="index.php?command=scan" class="btn btn-primary">Scan Now</a>
+                <a href="index.php?command=scan" class="btn btn-primary mt-auto">Scan Now</a>
               </div>
             </div>
           </div>
           <div class="col-md-4">
-            <div class="card">
-              <div class="card-body">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
                 <h5 class="card-title">View Rewards</h5>
                 <p class="card-text">Check your available rewards and points balance.</p>
-                <a href="index.php?command=rewards" class="btn btn-primary">View Rewards</a>
+                <a href="index.php?command=rewards" class="btn btn-primary mt-auto">View Rewards</a>
               </div>
             </div>
           </div>
           <div class="col-md-4">
-            <div class="card">
-              <div class="card-body">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
                 <h5 class="card-title">Transfer Points</h5>
                 <p class="card-text">Transfer points between different reward programs.</p>
-                <a href="index.php?command=transfer" class="btn btn-primary">Transfer Points</a>
+                <a href="index.php?command=transfer" class="btn btn-primary mt-auto">Transfer Points</a>
               </div>
             </div>
           </div>

@@ -87,6 +87,12 @@
         
         <section class="transfer-section mb-4">
           <form action="index.php?command=processTransfer" method="POST" id="transfer-form">
+            <!-- Add hidden fields for state maintenance -->
+            <input type="hidden" name="previous_from_restaurant" value="<?php echo isset($_POST['from_restaurant']) ? htmlspecialchars($_POST['from_restaurant']) : ''; ?>">
+            <input type="hidden" name="previous_to_restaurant" value="<?php echo isset($_POST['to_restaurant']) ? htmlspecialchars($_POST['to_restaurant']) : ''; ?>">
+            <input type="hidden" name="previous_amount" value="<?php echo isset($_POST['points']) ? htmlspecialchars($_POST['points']) : ''; ?>">
+            <input type="hidden" name="transfer_count" value="<?php echo isset($_POST['transfer_count']) ? intval($_POST['transfer_count']) + 1 : 1; ?>">
+            
             <div class="row text-center">
               <div class="col-md-4 transfer-col">
                 <div id="fromRestaurantLogo">
@@ -118,7 +124,7 @@
               </div>
 
               <div class="col-md-4 transfer-col d-flex flex-column justify-content-center">
-                <p class="conversion-rate mb-2">Conversion Rate: 1:0.5</p>
+                <p class="conversion-rate mb-2" id="conversionRate">Conversion Rate: 1:0.5</p>
                 <i class="fas fa-arrow-right fa-3x mb-2"></i>
                 <p class="receive-label mb-3" id="receivedPoints">You will receive 0 points</p>
                 <button type="submit" class="btn btn-primary">Transfer</button>
@@ -135,12 +141,14 @@
                 
                 <select class="form-select mb-2" name="to_restaurant" id="toRestaurant" required>
                   <?php foreach($restaurants as $restaurant): ?>
-                    <option value="<?php echo htmlspecialchars($restaurant['id']); ?>"
-                            data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
-                            data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>"
-                            <?php echo ($restaurant['id'] == $secondRestaurantId) ? 'selected' : ''; ?>>
-                      <?php echo htmlspecialchars($restaurant['name']); ?>
-                    </option>
+                    <?php if($restaurant['id'] != $firstRestaurantId): ?>
+                      <option value="<?php echo htmlspecialchars($restaurant['id']); ?>"
+                              data-logo="<?php echo htmlspecialchars($restaurant['logo_path']); ?>"
+                              data-points="<?php echo htmlspecialchars($pointBalances[$restaurant['id']]['points'] ?? 0); ?>"
+                              <?php echo ($restaurant['id'] == $secondRestaurantId) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($restaurant['name']); ?>
+                      </option>
+                    <?php endif; ?>
                   <?php endforeach; ?>
                 </select>
                 
@@ -248,6 +256,11 @@
         fromPoints.textContent = `${points} pts`;
         fromPoints.className = `balance-${fromRestaurant.value}`;
         
+        // Update toRestaurant options to disable the selected fromRestaurant
+        Array.from(toRestaurant.options).forEach(option => {
+          option.disabled = option.value === fromRestaurant.value;
+        });
+        
         calculatePoints();
       }
       
@@ -296,5 +309,34 @@
       });
     });
   </script>
+
+  <style>
+    .transfer-logo-container {
+      height: 200px;  /* Increased from 150px */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .transfer-restaurant-logo {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .transfer-controls {
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .transfer-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
 </body>
 </html> 
