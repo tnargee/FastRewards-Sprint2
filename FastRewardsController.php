@@ -450,5 +450,32 @@ class FastRewardsController {
         header("Location: index.php?command=signin");
         exit();
     }
+
+    // Get point balances in JSON format for AJAX requests
+    public function getPointBalancesJson() {
+        if(!isset($_SESSION['user_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+        
+        $userId = $_SESSION['user_id'];
+        $pointBalances = $this->getUserPointBalances($userId);
+        
+        // Format the data for the frontend
+        $formattedBalances = [];
+        foreach ($pointBalances as $balance) {
+            $formattedBalances[] = [
+                'restaurant_id' => $balance['restaurant_id'],
+                'restaurant_name' => $balance['restaurant_name'],
+                'points' => $balance['points'],
+                'logo' => strtolower(str_replace(' ', '', $balance['restaurant_name'])) . '.png'
+            ];
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($formattedBalances);
+        exit();
+    }
 }
 ?> 
