@@ -25,6 +25,7 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
+            background-color: #ffffff;
         }
 
         #wrapper {
@@ -35,6 +36,7 @@
         #sidebar {
             height: 100%;
             overflow-y: auto;
+            background-color: #ffffff;
         }
 
         #page-content-wrapper {
@@ -168,7 +170,7 @@
     <!-- Main Content Wrapper -->
     <div id="wrapper" class="d-flex">
       <!-- Sidebar for large screens -->
-      <nav id="sidebar" class="bg-light border-end d-none d-lg-block">
+      <nav id="sidebar" class="bg-white border-end d-none d-lg-block">
         <div class="list-group list-group-flush">
           <a href="index.php?command=home" class="list-group-item list-group-item-action"
             >Home</a

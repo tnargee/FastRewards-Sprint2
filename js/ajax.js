@@ -1,3 +1,5 @@
+// Author: Kyle Vitayanuvatti, Tenzin Nargee
+
 // User object to store user info
 const User = {
     id: null,

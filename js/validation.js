@@ -1,3 +1,5 @@
+// Author: Kyle Vitayanuvatti
+
 // Email validation using regex
 const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

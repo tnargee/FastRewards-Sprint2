@@ -1,3 +1,5 @@
+// Author: Kyle Vitayanuvatti
+
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
     addGlobalEventListeners();

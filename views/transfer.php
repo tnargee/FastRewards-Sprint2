@@ -14,6 +14,31 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="transfer.css">
   <link rel="stylesheet" href="js-styles.css">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #wrapper {
+      height: calc(100vh - 56px); /* Subtract header height */
+      overflow: hidden;
+    }
+
+    #sidebar {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    #page-content-wrapper {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
   <!-- Top Navbar -->
@@ -63,7 +88,7 @@
 
   <!-- Main Content Wrapper -->
   <div id="wrapper" class="d-flex">
-    <nav id="sidebar" class="bg-light border-end d-none d-lg-block">
+    <nav id="sidebar" class="bg-white border-end d-none d-lg-block">
       <div class="list-group list-group-flush">
         <a href="index.php?command=home" class="list-group-item list-group-item-action">Home</a>
         <a href="index.php?command=scan" class="list-group-item list-group-item-action">Scan</a>

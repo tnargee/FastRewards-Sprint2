@@ -1,3 +1,5 @@
+// Author: Kyle Vitayanuvatti
+
 // Function to create a notification element and append it to the container
 const showNotification = (message, type = 'info') => {
     // Create notification element
