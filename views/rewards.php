@@ -19,6 +19,105 @@
 
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="rewards.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #wrapper {
+            height: calc(100vh - 56px); /* Subtract header height */
+            overflow: hidden;
+        }
+
+        #sidebar {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #page-content-wrapper {
+            height: 100%;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            margin: 30px 0 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .current-points-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s;
+        }
+
+        .current-points-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .current-points-card .brand-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .reward-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .reward-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .reward-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .reward-info {
+            padding: 15px;
+        }
+
+        .reward-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .restaurant-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            object-fit: contain;
+        }
+
+        .reward-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .reward-points {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
   </head>
   <body>
     <!-- Top Navbar -->
@@ -116,51 +215,159 @@
           <!-- Deals Section -->
           <h4 class="section-title">Deals</h4>
           <div class="row">
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/breakfast.png" alt="Breakfast Sandwich Set" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/wawa.png" alt="Wawa Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Breakfast Sandwich Set</h5>
+                  </div>
+                  <p class="reward-points">2500 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/hoagie-set.png" alt="Hoagie Set" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/wawa.png" alt="Wawa Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Hoagie Set</h5>
+                  </div>
+                  <p class="reward-points">3000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/egg-sand.png" alt="Egg Sandwich Deal" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/starbucks.png" alt="Starbucks Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Egg Sandwich Deal</h5>
+                  </div>
+                  <p class="reward-points">1000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/nuggets.jpg" alt="20 pc Nuggets Deal" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/mcd.png" alt="McDonald's Logo" class="restaurant-logo">
+                    <h5 class="reward-title">20 pc Nuggets Deal</h5>
+                  </div>
+                  <p class="reward-points">5000 points</p>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Meals Section -->
           <h4 class="section-title">Meals</h4>
           <div class="row">
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/happy-meal.jpeg" alt="Happy Meal" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/mcd.png" alt="McDonald's Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Happy Meal</h5>
+                  </div>
+                  <p class="reward-points">5000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/bowl.jpg" alt="Chicken Bowl" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/chipotle.png" alt="Chipotle Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Chicken Bowl</h5>
+                  </div>
+                  <p class="reward-points">3000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/big-mac.png" alt="Big Mac Meal" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/mcd.png" alt="McDonald's Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Big Mac Meal</h5>
+                  </div>
+                  <p class="reward-points">5000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/burito.jpg" alt="Burrito" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/chipotle.png" alt="Chipotle Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Burrito</h5>
+                  </div>
+                  <p class="reward-points">2500 points</p>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Drinks & Dessert Section -->
           <h4 class="section-title">Drinks & Dessert</h4>
           <div class="row">
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/matcha.jpg" alt="Iced Matcha Latte" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/starbucks.png" alt="Starbucks Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Iced Matcha Latte</h5>
+                  </div>
+                  <p class="reward-points">700 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/dessert-deal.jpg" alt="Breakfast Dessert Set" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/starbucks.png" alt="Starbucks Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Breakfast Dessert Set</h5>
+                  </div>
+                  <p class="reward-points">1000 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/sprite.jpeg" alt="Large Sprite" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/mcd.png" alt="McDonald's Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Large Sprite</h5>
+                  </div>
+                  <p class="reward-points">500 points</p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-3">
-              <div class="placeholder-box"></div>
+            <div class="col-md-3 mb-4">
+              <div class="reward-card">
+                <img src="assets/rewards/ice-bevs.png" alt="Iced Coffee" class="reward-image">
+                <div class="reward-info">
+                  <div class="reward-header">
+                    <img src="assets/wawa.png" alt="Wawa Logo" class="restaurant-logo">
+                    <h5 class="reward-title">Iced Coffee</h5>
+                  </div>
+                  <p class="reward-points">2500 points</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

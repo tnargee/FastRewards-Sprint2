@@ -308,6 +308,28 @@
         }
       });
     });
+
+    $(document).ready(function() {
+        $('#transfer-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const fromRestaurant = $('#from_restaurant').val();
+            const toRestaurant = $('#to_restaurant').val();
+            const points = $('#points').val();
+            
+            if (!fromRestaurant || !toRestaurant || !points) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            transferPoints(fromRestaurant, toRestaurant, points);
+        });
+        
+        // Update conversion rate when restaurants or points change
+        $('#from_restaurant, #to_restaurant, #points').on('change', function() {
+            updateConversionRate();
+        });
+    });
   </script>
 
   <style>

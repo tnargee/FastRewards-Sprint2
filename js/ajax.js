@@ -54,7 +54,10 @@ const loadTransactions = async () => {
         transactionsContainer.innerHTML = '<div class="loading">Loading transactions...</div>';
         
         // Fetch transactions
-        const transactions = await fetchTransactions();
+        const response = await fetchTransactions();
+        
+        // Ensure we have an array of transactions
+        const transactions = Array.isArray(response.transactions) ? response.transactions : [];
         
         // Update the DOM with the transactions
         updateTransactionsList(transactions);
@@ -89,33 +92,46 @@ const loadPointBalances = () => {
 };
 
 // Submit transfer form using jQuery AJAX
-const submitTransfer = (formData) => {
+function transferPoints(fromRestaurant, toRestaurant, points) {
     $.ajax({
         url: 'index.php?command=processTransfer',
         method: 'POST',
-        data: formData,
+        data: {
+            from_restaurant: fromRestaurant,
+            to_restaurant: toRestaurant,
+            points: points
+        },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                showNotification(response.message || 'Transfer completed successfully!', 'success');
-                
-                // Update the displayed point balances
+                // Update point balances in the UI
                 if (response.balances) {
-                    updatePointsDisplay(response.balances);
+                    Object.keys(response.balances).forEach(function(restaurantId) {
+                        const balanceElement = document.querySelector(`#balance-${restaurantId}`);
+                        if (balanceElement) {
+                            balanceElement.textContent = response.balances[restaurantId];
+                        }
+                    });
                 }
+                
+                // Show success message
+                showNotification(response.message, 'success');
                 
                 // Reset form
                 $('#transfer-form')[0].reset();
+                
+                // Update conversion rate and received points displays
+                updateConversionRate();
             } else {
-                showNotification(response.message || 'Transfer failed', 'error');
+                showNotification(response.message, 'error');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error processing transfer:', error);
-            showNotification('An error occurred while processing your transfer. Please try again.', 'error');
+            console.error('Transfer error:', error);
+            showNotification('An error occurred during the transfer. Please try again.', 'error');
         }
     });
-};
+}
 
 // Update points display after transfer
 const updatePointsDisplay = (balances) => {

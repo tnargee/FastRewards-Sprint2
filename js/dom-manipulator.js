@@ -52,29 +52,17 @@ const createTransactionCard = (transaction) => {
     const card = document.createElement('div');
     card.className = 'transaction-card';
     
-    const dateOptions = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
     const formattedDate = new Date(transaction.created_at).toLocaleDateString('en-US', dateOptions);
     
-    let typeText, iconClass;
-    if (transaction.type === 'earn') {
-        typeText = 'Earned';
-        iconClass = 'earn-icon';
-    } else if (transaction.type === 'redeem') {
-        typeText = 'Redeemed';
-        iconClass = 'redeem-icon';
-    } else {
-        typeText = 'Transferred';
-        iconClass = 'transfer-icon';
-    }
-    
     card.innerHTML = `
-        <div class="transaction-icon ${iconClass}"></div>
+        <div class="transaction-icon transfer-icon"></div>
         <div class="transaction-details">
-            <h3>${transaction.restaurant_name}</h3>
+            <h3>${transaction.from_restaurant_name} → ${transaction.to_restaurant_name}</h3>
             <p class="transaction-date">${formattedDate}</p>
         </div>
         <div class="transaction-points">
-            <p class="points ${transaction.type}">${typeText}: ${transaction.points} points</p>
+            <p class="points transfer">Transferred: ${transaction.points_transferred} points (Received: ${transaction.points_received} points)</p>
         </div>
     `;
     

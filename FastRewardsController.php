@@ -321,8 +321,14 @@ class FastRewardsController {
     
     public function processTransfer() {
         if(!isset($_SESSION['user_id'])) {
-            header("Location: index.php?command=signin");
-            exit();
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Session expired. Please sign in again.']);
+                exit();
+            } else {
+                header("Location: index.php?command=signin");
+                exit();
+            }
         }
         
         $userId = $_SESSION['user_id'];
@@ -341,16 +347,28 @@ class FastRewardsController {
             
             // Validate points
             if($points <= 0) {
-                $_SESSION['message'] = "Please enter a positive number of points to transfer.";
-                header("Location: index.php?command=transfer");
-                exit();
+                if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Please enter a positive number of points to transfer.']);
+                    exit();
+                } else {
+                    $_SESSION['message'] = "Please enter a positive number of points to transfer.";
+                    header("Location: index.php?command=transfer");
+                    exit();
+                }
             }
             
             // Check if restaurants are different
             if($fromRestaurantId === $toRestaurantId) {
-                $_SESSION['message'] = "Cannot transfer points to the same restaurant.";
-                header("Location: index.php?command=transfer");
-                exit();
+                if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Cannot transfer points to the same restaurant.']);
+                    exit();
+                } else {
+                    $_SESSION['message'] = "Cannot transfer points to the same restaurant.";
+                    header("Location: index.php?command=transfer");
+                    exit();
+                }
             }
             
             try {
@@ -365,10 +383,15 @@ class FastRewardsController {
                 );
                 
                 if(!$fromBalance || $fromBalance['points'] < $points) {
-                    $_SESSION['message'] = "You don't have enough points to complete this transfer.";
-                    $this->db->query("ROLLBACK");
-                    header("Location: index.php?command=transfer");
-                    exit();
+                    if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'message' => 'Insufficient points balance.']);
+                        exit();
+                    } else {
+                        $_SESSION['message'] = "Insufficient points balance.";
+                        header("Location: index.php?command=transfer");
+                        exit();
+                    }
                 }
                 
                 // Calculate conversion rate (example: 1:0.5)
@@ -412,7 +435,7 @@ class FastRewardsController {
                     [$toRestaurantId]
                 );
                 
-                // Build success message with current transfer details
+                // Build success message
                 $message = "Successfully transferred $points points from " . 
                           htmlspecialchars($currentFromRestaurant['name']) . " to " . 
                           htmlspecialchars($currentToRestaurant['name']) . 
@@ -433,20 +456,45 @@ class FastRewardsController {
                                htmlspecialchars($toRestaurant['name']) . "</small>";
                 }
                 
-                $_SESSION['message'] = $message;
-                header("Location: index.php?command=transfer");
-                exit();
+                // Get updated balances
+                $balances = $this->getUserPointBalances($userId);
+                
+                if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'message' => $message,
+                        'balances' => $balances
+                    ]);
+                    exit();
+                } else {
+                    $_SESSION['message'] = $message;
+                    header("Location: index.php?command=transfer");
+                    exit();
+                }
                 
             } catch (Exception $e) {
                 $this->db->query("ROLLBACK");
-                $_SESSION['message'] = "Error during transfer: " . $e->getMessage();
+                if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Error during transfer: ' . $e->getMessage()]);
+                    exit();
+                } else {
+                    $_SESSION['message'] = "Error during transfer: " . $e->getMessage();
+                    header("Location: index.php?command=transfer");
+                    exit();
+                }
+            }
+        } else {
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Please fill out all required fields.']);
+                exit();
+            } else {
+                $_SESSION['message'] = "Please fill out all required fields.";
                 header("Location: index.php?command=transfer");
                 exit();
             }
-        } else {
-            $_SESSION['message'] = "Please fill out all required fields.";
-            header("Location: index.php?command=transfer");
-            exit();
         }
     }
     

@@ -12,13 +12,13 @@
  * on our course Canvas site.
  */
 
-class Config {
+ class Config {
     public static $db = [
-        "host" => "localhost",
+        "host" => "db",
         "port" => 5432,
-        "user" => "ghf3ky",
-        "pass" => "g4W0voKILD0A",
-        "database" => "ghf3ky"
+        "user" => "localuser",
+        "pass" => "cs4640LocalUser!",
+        "database" => "example"
     ];
 }
 ?> 
