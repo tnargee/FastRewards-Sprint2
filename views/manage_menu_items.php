@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="Kyle Vitayanuvatti">
-    <title>FastRewards - Manage Deals</title>
+    <title>FastRewards - Manage Menu Items</title>
 
     <!-- Bootstrap CSS -->
     <link
@@ -44,19 +44,12 @@
             padding: 20px;
         }
 
-        .manage-deals-card {
+        .manage-items-card {
             background: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 20px;
             margin-bottom: 20px;
-        }
-        
-        .deal-preview {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
         }
     </style>
   </head>
@@ -103,8 +96,8 @@
           <li><a href="index.php?command=transactions" class="d-block py-1">Transactions</a></li>
           <li><a href="index.php?command=order" class="d-block py-1">Order</a></li>
           <li><a href="index.php?command=orders_history" class="d-block py-1">Order History</a></li>
-          <li><a href="index.php?command=manage_deals" class="d-block py-1 active">Manage Deals</a></li>
-          <li><a href="index.php?command=manage_menu_items" class="d-block py-1">Manage Menu Items</a></li>
+          <li><a href="index.php?command=manage_deals" class="d-block py-1">Manage Deals</a></li>
+          <li><a href="index.php?command=manage_menu_items" class="d-block py-1 active">Manage Menu Items</a></li>
         </ul>
       </div>
     </div>
@@ -122,15 +115,15 @@
           <a href="index.php?command=transactions" class="list-group-item list-group-item-action">Transactions</a>
           <a href="index.php?command=order" class="list-group-item list-group-item-action">Order</a>
           <a href="index.php?command=orders_history" class="list-group-item list-group-item-action">Order History</a>
-          <a href="index.php?command=manage_deals" class="list-group-item list-group-item-action active">Manage Deals</a>
-          <a href="index.php?command=manage_menu_items" class="list-group-item list-group-item-action">Manage Menu Items</a>
+          <a href="index.php?command=manage_deals" class="list-group-item list-group-item-action">Manage Deals</a>
+          <a href="index.php?command=manage_menu_items" class="list-group-item list-group-item-action active">Manage Menu Items</a>
         </div>
       </nav>
 
       <!-- Page Content -->
       <div id="page-content-wrapper">
         <div class="container-fluid">
-          <h2 class="mb-4">Manage Deals</h2>
+          <h2 class="mb-4">Manage Menu Items</h2>
           
           <?php if(isset($_SESSION['message'])): ?>
             <div class="alert alert-info alert-dismissible fade show" role="alert">
@@ -139,10 +132,10 @@
             </div>
           <?php endif; ?>
           
-          <div class="manage-deals-card">
-            <h4>Add New Deal</h4>
-            <form action="index.php?command=process_deal" method="post">
-              <input type="hidden" name="deal_action" value="add">
+          <div class="manage-items-card">
+            <h4>Add New Menu Item</h4>
+            <form action="index.php?command=process_menu_item" method="post">
+              <input type="hidden" name="action" value="add">
               
               <div class="row">
                 <div class="col-md-6 mb-3">
@@ -156,18 +149,13 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                  <label for="title" class="form-label">Deal Title</label>
-                  <input type="text" class="form-control" name="title" id="title" required>
+                  <label for="name" class="form-label">Menu Item Name</label>
+                  <input type="text" class="form-control" name="name" id="name" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                  <label for="points_required" class="form-label">Points Required</label>
-                  <input type="number" class="form-control" name="points_required" id="points_required" min="1" required>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                  <label for="image_path" class="form-label">Image Path</label>
-                  <input type="text" class="form-control" name="image_path" id="image_path" required placeholder="assets/rewards/image.jpg">
+                  <label for="price" class="form-label">Price</label>
+                  <input type="number" class="form-control" name="price" id="price" min="0.01" step="0.01" required>
                 </div>
                 
                 <div class="col-md-12 mb-3">
@@ -176,59 +164,56 @@
                 </div>
               </div>
               
-              <button type="submit" class="btn btn-primary">Add Deal</button>
+              <button type="submit" class="btn btn-primary">Add Menu Item</button>
             </form>
           </div>
           
-          <h4 class="mt-4 mb-3">Current Deals</h4>
+          <h4 class="mt-4 mb-3">Current Menu Items</h4>
           
-          <?php if(empty($deals)): ?>
-            <p>No deals found. Add your first deal above.</p>
+          <?php if(empty($menuItems)): ?>
+            <p>No menu items found. Add your first menu item above.</p>
           <?php else: ?>
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Preview</th>
-                    <th>Title</th>
+                    <th>Name</th>
                     <th>Restaurant</th>
-                    <th>Points</th>
+                    <th>Price</th>
+                    <th>Description</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php foreach($deals as $deal): ?>
+                  <?php foreach($menuItems as $item): ?>
                     <tr>
+                      <td><?php echo htmlspecialchars($item['name']); ?></td>
+                      <td><?php echo htmlspecialchars($item['restaurant_name']); ?></td>
+                      <td>$<?php echo number_format($item['price'], 2); ?></td>
+                      <td><?php echo htmlspecialchars($item['description'] ?? ''); ?></td>
                       <td>
-                        <img src="<?php echo htmlspecialchars($deal['image_path']); ?>" alt="<?php echo htmlspecialchars($deal['title']); ?>" class="deal-preview">
-                      </td>
-                      <td><?php echo htmlspecialchars($deal['title']); ?></td>
-                      <td><?php echo htmlspecialchars($deal['restaurant_name']); ?></td>
-                      <td><?php echo htmlspecialchars($deal['points_required']); ?></td>
-                      <td>
-                        <?php if($deal['active']): ?>
+                        <?php if($item['active']): ?>
                           <span class="badge bg-success">Active</span>
                         <?php else: ?>
                           <span class="badge bg-secondary">Inactive</span>
                         <?php endif; ?>
                       </td>
                       <td>
-                        <button type="button" class="btn btn-sm btn-outline-primary edit-deal-btn" 
-                                data-id="<?php echo $deal['id']; ?>"
-                                data-restaurant="<?php echo $deal['restaurant_id']; ?>"
-                                data-title="<?php echo htmlspecialchars($deal['title']); ?>"
-                                data-points="<?php echo $deal['points_required']; ?>"
-                                data-image="<?php echo htmlspecialchars($deal['image_path']); ?>"
-                                data-description="<?php echo htmlspecialchars($deal['description'] ?? ''); ?>"
-                                data-active="<?php echo $deal['active'] ? '1' : '0'; ?>"
-                                data-bs-toggle="modal" data-bs-target="#editDealModal">
+                        <button type="button" class="btn btn-sm btn-outline-primary edit-item-btn" 
+                                data-id="<?php echo $item['id']; ?>"
+                                data-restaurant="<?php echo $item['restaurant_id']; ?>"
+                                data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                data-price="<?php echo $item['price']; ?>"
+                                data-description="<?php echo htmlspecialchars($item['description'] ?? ''); ?>"
+                                data-active="<?php echo $item['active'] ? '1' : '0'; ?>"
+                                data-bs-toggle="modal" data-bs-target="#editItemModal">
                           Edit
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger delete-deal-btn" 
-                                data-id="<?php echo $deal['id']; ?>"
-                                data-title="<?php echo htmlspecialchars($deal['title']); ?>"
-                                data-bs-toggle="modal" data-bs-target="#deleteDealModal">
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-item-btn" 
+                                data-id="<?php echo $item['id']; ?>"
+                                data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                data-bs-toggle="modal" data-bs-target="#deleteItemModal">
                           Delete
                         </button>
                       </td>
@@ -242,18 +227,18 @@
       </div>
     </div>
     
-    <!-- Edit Deal Modal -->
-    <div class="modal fade" id="editDealModal" tabindex="-1" aria-labelledby="editDealModalLabel" aria-hidden="true">
+    <!-- Edit Menu Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="editDealModalLabel">Edit Deal</h5>
+            <h5 class="modal-title" id="editItemModalLabel">Edit Menu Item</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="index.php?command=process_deal" method="post">
+          <form action="index.php?command=process_menu_item" method="post">
             <div class="modal-body">
-              <input type="hidden" name="deal_action" value="edit">
-              <input type="hidden" name="deal_id" id="edit_deal_id">
+              <input type="hidden" name="action" value="edit">
+              <input type="hidden" name="item_id" id="edit_item_id">
               
               <div class="row">
                 <div class="col-md-6 mb-3">
@@ -267,18 +252,13 @@
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                  <label for="edit_title" class="form-label">Deal Title</label>
-                  <input type="text" class="form-control" name="title" id="edit_title" required>
+                  <label for="edit_name" class="form-label">Menu Item Name</label>
+                  <input type="text" class="form-control" name="name" id="edit_name" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                  <label for="edit_points_required" class="form-label">Points Required</label>
-                  <input type="number" class="form-control" name="points_required" id="edit_points_required" min="1" required>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                  <label for="edit_image_path" class="form-label">Image Path</label>
-                  <input type="text" class="form-control" name="image_path" id="edit_image_path" required>
+                  <label for="edit_price" class="form-label">Price</label>
+                  <input type="number" class="form-control" name="price" id="edit_price" min="0.01" step="0.01" required>
                 </div>
                 
                 <div class="col-md-12 mb-3">
@@ -301,23 +281,23 @@
       </div>
     </div>
     
-    <!-- Delete Deal Modal -->
-    <div class="modal fade" id="deleteDealModal" tabindex="-1" aria-labelledby="deleteDealModalLabel" aria-hidden="true">
+    <!-- Delete Menu Item Modal -->
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="deleteDealModalLabel">Confirm Deletion</h5>
+            <h5 class="modal-title" id="deleteItemModalLabel">Confirm Deletion</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>Are you sure you want to delete the deal: <span id="delete_deal_title"></span>?</p>
+            <p>Are you sure you want to delete the menu item: <span id="delete_item_name"></span>?</p>
             <p class="text-danger">This action cannot be undone.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <form action="index.php?command=process_deal" method="post">
-              <input type="hidden" name="deal_action" value="delete">
-              <input type="hidden" name="deal_id" id="delete_deal_id">
+            <form action="index.php?command=process_menu_item" method="post">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="item_id" id="delete_item_id">
               <button type="submit" class="btn btn-danger">Delete</button>
             </form>
           </div>
@@ -330,34 +310,32 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Handle edit buttons
-        document.querySelectorAll('.edit-deal-btn').forEach(function(button) {
+        document.querySelectorAll('.edit-item-btn').forEach(function(button) {
           button.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
             const restaurant = this.getAttribute('data-restaurant');
-            const title = this.getAttribute('data-title');
-            const points = this.getAttribute('data-points');
-            const image = this.getAttribute('data-image');
+            const name = this.getAttribute('data-name');
+            const price = this.getAttribute('data-price');
             const description = this.getAttribute('data-description');
             const active = this.getAttribute('data-active') === '1';
             
-            document.getElementById('edit_deal_id').value = id;
+            document.getElementById('edit_item_id').value = id;
             document.getElementById('edit_restaurant_id').value = restaurant;
-            document.getElementById('edit_title').value = title;
-            document.getElementById('edit_points_required').value = points;
-            document.getElementById('edit_image_path').value = image;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_price').value = price;
             document.getElementById('edit_description').value = description;
             document.getElementById('edit_active').checked = active;
           });
         });
         
         // Handle delete buttons
-        document.querySelectorAll('.delete-deal-btn').forEach(function(button) {
+        document.querySelectorAll('.delete-item-btn').forEach(function(button) {
           button.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
-            const title = this.getAttribute('data-title');
+            const name = this.getAttribute('data-name');
             
-            document.getElementById('delete_deal_id').value = id;
-            document.getElementById('delete_deal_title').textContent = title;
+            document.getElementById('delete_item_id').value = id;
+            document.getElementById('delete_item_name').textContent = name;
           });
         });
       });

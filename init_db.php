@@ -76,6 +76,53 @@ try {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     
+    // Create orders table
+    $db->query("CREATE TABLE fastrewards_orders (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES fastrewards_users(id) ON DELETE CASCADE,
+        restaurant_id INTEGER NOT NULL REFERENCES fastrewards_restaurants(id) ON DELETE CASCADE,
+        total_amount DECIMAL(10,2) NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        points_earned INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
+    // Create order items table
+    $db->query("CREATE TABLE fastrewards_order_items (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER NOT NULL REFERENCES fastrewards_orders(id) ON DELETE CASCADE,
+        deal_id INTEGER REFERENCES fastrewards_deals(id) ON DELETE SET NULL,
+        item_name VARCHAR(255) NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        price DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
+    // Create receipts table for file uploads
+    $db->query("CREATE TABLE fastrewards_receipts (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES fastrewards_users(id) ON DELETE CASCADE,
+        restaurant_id INTEGER NOT NULL REFERENCES fastrewards_restaurants(id) ON DELETE CASCADE,
+        file_path VARCHAR(255) NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        points_earned INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
+    // Create menu items table
+    $db->query("CREATE TABLE fastrewards_menu_items (
+        id SERIAL PRIMARY KEY,
+        restaurant_id INTEGER NOT NULL REFERENCES fastrewards_restaurants(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price DECIMAL(10,2) NOT NULL,
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
     // Insert default restaurants
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('McDonald''s', 'assets/mcd.png')");
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('Chipotle', 'assets/chipotle.png')");

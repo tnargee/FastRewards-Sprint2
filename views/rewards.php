@@ -162,6 +162,8 @@
           <li><a href="index.php?command=rewards" class="d-block py-1">Rewards</a></li>
           <li><a href="index.php?command=transfer" class="d-block py-1">Transfer</a></li>
           <li><a href="index.php?command=transactions" class="d-block py-1">Transactions</a></li>
+          <li><a href="index.php?command=order" class="d-block py-1">Order</a></li>
+          <li><a href="index.php?command=orders_history" class="d-block py-1">Order History</a></li>
           <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
           <li><a href="index.php?command=manage_deals" class="d-block py-1">Manage Deals</a></li>
           <?php endif; ?>
@@ -193,6 +195,12 @@
             href="index.php?command=transactions"
             class="list-group-item list-group-item-action"
             >Transactions</a
+          >
+          <a href="index.php?command=order" class="list-group-item list-group-item-action"
+            >Order</a
+          >
+          <a href="index.php?command=orders_history" class="list-group-item list-group-item-action"
+            >Order History</a
           >
           <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
           <a href="index.php?command=manage_deals" class="list-group-item list-group-item-action">Manage Deals</a>

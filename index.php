@@ -59,6 +59,27 @@ switch($command) {
     case 'process_deal':
         $controller->processDeal();
         break;
+    case 'manage_menu_items':
+        $controller->showManageMenuItems();
+        break;
+    case 'process_menu_item':
+        $controller->processMenuItem();
+        break;
+    case 'order':
+        $controller->showOrder();
+        break;
+    case 'process_order':
+        $controller->processOrder();
+        break;
+    case 'order_confirmation':
+        $controller->showOrderConfirmation();
+        break;
+    case 'orders_history':
+        $controller->showOrdersHistory();
+        break;
+    case 'process_file_upload':
+        $controller->processFileUpload();
+        break;
     case 'logout':
         $controller->logout();
         break;

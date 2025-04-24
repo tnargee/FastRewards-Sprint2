@@ -700,12 +700,148 @@ class FastRewardsController {
             
             return $deals;
         } catch (Exception $e) {
-            error_log("Error getting deals: " . $e->getMessage());
+            // Log error
+            error_log("Error fetching deals: " . $e->getMessage());
             return [];
         }
     }
 
-    // Get point balances in JSON format for AJAX requests
+    // Show the menu items management page for developers
+    public function showManageMenuItems() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!$this->isDeveloper()) {
+            $_SESSION['message'] = "You don't have permission to access this page.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        // Get all restaurants for the dropdown
+        $restaurants = $this->db->query("SELECT * FROM fastrewards_restaurants ORDER BY name");
+        
+        // Get all menu items
+        $menuItems = $this->db->query("
+            SELECT mi.*, r.name as restaurant_name
+            FROM fastrewards_menu_items mi
+            JOIN fastrewards_restaurants r ON mi.restaurant_id = r.id
+            ORDER BY r.name, mi.name
+        ");
+        
+        include 'views/manage_menu_items.php';
+    }
+    
+    // Process adding, editing, or deleting a menu item
+    public function processMenuItem() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!$this->isDeveloper()) {
+            $_SESSION['message'] = "You don't have permission to perform this action.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        if(isset($_POST['action'])) {
+            $action = $_POST['action'];
+            
+            if($action === 'add' && 
+               isset($_POST['restaurant_id']) && 
+               isset($_POST['name']) && 
+               isset($_POST['price'])) {
+                
+                $restaurantId = $_POST['restaurant_id'];
+                $name = trim($_POST['name']);
+                $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+                $price = floatval($_POST['price']);
+                $active = isset($_POST['active']) ? 1 : 1; // Default to active
+                
+                if(empty($name) || $price <= 0) {
+                    $_SESSION['message'] = "Please fill all required fields properly.";
+                    header("Location: index.php?command=manage_menu_items");
+                    exit();
+                }
+                
+                try {
+                    $this->db->query(
+                        "INSERT INTO fastrewards_menu_items (restaurant_id, name, description, price, active) 
+                         VALUES ($1, $2, $3, $4, $5)",
+                        [$restaurantId, $name, $description, $price, $active]
+                    );
+                    
+                    $_SESSION['message'] = "Menu item created successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error creating menu item: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_menu_items");
+                exit();
+            }
+            else if($action === 'edit' && 
+                    isset($_POST['item_id']) && 
+                    isset($_POST['restaurant_id']) && 
+                    isset($_POST['name']) && 
+                    isset($_POST['price'])) {
+                
+                $itemId = $_POST['item_id'];
+                $restaurantId = $_POST['restaurant_id'];
+                $name = trim($_POST['name']);
+                $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+                $price = floatval($_POST['price']);
+                $active = isset($_POST['active']) ? 1 : 0;
+                
+                if(empty($name) || $price <= 0) {
+                    $_SESSION['message'] = "Please fill all required fields properly.";
+                    header("Location: index.php?command=manage_menu_items");
+                    exit();
+                }
+                
+                try {
+                    $this->db->query(
+                        "UPDATE fastrewards_menu_items 
+                         SET restaurant_id = $1, name = $2, description = $3, 
+                         price = $4, active = $5, updated_at = CURRENT_TIMESTAMP
+                         WHERE id = $6",
+                        [$restaurantId, $name, $description, $price, $active, $itemId]
+                    );
+                    
+                    $_SESSION['message'] = "Menu item updated successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error updating menu item: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_menu_items");
+                exit();
+            }
+            else if($action === 'delete' && isset($_POST['item_id'])) {
+                $itemId = $_POST['item_id'];
+                
+                try {
+                    $this->db->query(
+                        "DELETE FROM fastrewards_menu_items WHERE id = $1",
+                        [$itemId]
+                    );
+                    
+                    $_SESSION['message'] = "Menu item deleted successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error deleting menu item: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_menu_items");
+                exit();
+            }
+        }
+        
+        $_SESSION['message'] = "Invalid request.";
+        header("Location: index.php?command=manage_menu_items");
+        exit();
+    }
+    
+    // JSON response endpoint for point balances
     public function getPointBalancesJson() {
         if(!isset($_SESSION['user_id'])) {
             header('Content-Type: application/json');
@@ -730,6 +866,289 @@ class FastRewardsController {
         header('Content-Type: application/json');
         echo json_encode($formattedBalances);
         exit();
+    }
+    
+    // Show order page with restaurant menu items
+    public function showOrder() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        // Get restaurant ID from the URL
+        $restaurantId = isset($_GET['restaurant_id']) ? intval($_GET['restaurant_id']) : null;
+        
+        if (!$restaurantId) {
+            // If no restaurant selected, show list of restaurants
+            $restaurants = $this->db->query("SELECT * FROM fastrewards_restaurants ORDER BY name");
+            include 'views/order_restaurants.php';
+            return;
+        }
+        
+        // Get restaurant details
+        $restaurant = $this->db->fetch(
+            "SELECT * FROM fastrewards_restaurants WHERE id = $1",
+            [$restaurantId]
+        );
+        
+        if (!$restaurant) {
+            $_SESSION['message'] = "Restaurant not found.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        // Get available deals for this restaurant
+        $deals = $this->db->query(
+            "SELECT * FROM fastrewards_deals WHERE restaurant_id = $1 AND active = true",
+            [$restaurantId]
+        );
+        
+        // Get user's point balance for this restaurant
+        $userId = $_SESSION['user_id'];
+        $pointBalances = $this->getUserPointBalances($userId);
+        $currentPoints = isset($pointBalances[$restaurantId]) ? $pointBalances[$restaurantId]['points'] : 0;
+        
+        include 'views/order.php';
+    }
+    
+    // Process the order submission
+    public function processOrder() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!isset($_POST['restaurant_id']) || !isset($_POST['items']) || empty($_POST['items'])) {
+            $_SESSION['message'] = "Invalid order data.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        $userId = $_SESSION['user_id'];
+        $restaurantId = intval($_POST['restaurant_id']);
+        $items = json_decode($_POST['items'], true);
+        
+        if (!is_array($items) || empty($items)) {
+            $_SESSION['message'] = "No items in order.";
+            header("Location: index.php?command=order&restaurant_id=" . $restaurantId);
+            exit();
+        }
+        
+        try {
+            // Begin transaction
+            $this->db->query("BEGIN");
+            
+            // Calculate total amount
+            $totalAmount = 0;
+            foreach ($items as $item) {
+                $totalAmount += ($item['price'] * $item['quantity']);
+            }
+            
+            // Create order
+            $this->db->query(
+                "INSERT INTO fastrewards_orders (user_id, restaurant_id, total_amount) 
+                VALUES ($1, $2, $3) RETURNING id",
+                [$userId, $restaurantId, $totalAmount]
+            );
+            
+            // Get the newly created order ID
+            $orderId = $this->db->fetch("SELECT lastval() as id")['id'];
+            
+            // Insert order items
+            foreach ($items as $item) {
+                $dealId = isset($item['deal_id']) ? $item['deal_id'] : null;
+                $this->db->query(
+                    "INSERT INTO fastrewards_order_items (order_id, deal_id, item_name, quantity, price) 
+                    VALUES ($1, $2, $3, $4, $5)",
+                    [$orderId, $dealId, $item['name'], $item['quantity'], $item['price']]
+                );
+            }
+            
+            // Calculate points earned (10 points per dollar)
+            $pointsEarned = round($totalAmount * 10);
+            
+            // Update order with points earned
+            $this->db->query(
+                "UPDATE fastrewards_orders SET points_earned = $1, status = 'completed' WHERE id = $2",
+                [$pointsEarned, $orderId]
+            );
+            
+            // Add points to user's balance
+            $this->db->query(
+                "UPDATE fastrewards_point_balances 
+                SET points = points + $1, updated_at = CURRENT_TIMESTAMP 
+                WHERE user_id = $2 AND restaurant_id = $3",
+                [$pointsEarned, $userId, $restaurantId]
+            );
+            
+            // Commit transaction
+            $this->db->query("COMMIT");
+            
+            $_SESSION['message'] = "Order placed successfully! You earned $pointsEarned points.";
+            header("Location: index.php?command=order_confirmation&order_id=" . $orderId);
+            exit();
+            
+        } catch (Exception $e) {
+            $this->db->query("ROLLBACK");
+            $_SESSION['message'] = "Error processing order: " . $e->getMessage();
+            header("Location: index.php?command=order&restaurant_id=" . $restaurantId);
+            exit();
+        }
+    }
+    
+    // Show order confirmation page
+    public function showOrderConfirmation() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!isset($_GET['order_id'])) {
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        $orderId = intval($_GET['order_id']);
+        $userId = $_SESSION['user_id'];
+        
+        // Get order details
+        $order = $this->db->fetch(
+            "SELECT o.*, r.name as restaurant_name, r.logo_path 
+            FROM fastrewards_orders o
+            JOIN fastrewards_restaurants r ON o.restaurant_id = r.id
+            WHERE o.id = $1 AND o.user_id = $2",
+            [$orderId, $userId]
+        );
+        
+        if (!$order) {
+            $_SESSION['message'] = "Order not found.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        // Get order items
+        $items = $this->db->query(
+            "SELECT oi.*, d.title as deal_title 
+            FROM fastrewards_order_items oi
+            LEFT JOIN fastrewards_deals d ON oi.deal_id = d.id
+            WHERE oi.order_id = $1",
+            [$orderId]
+        );
+        
+        include 'views/order_confirmation.php';
+    }
+    
+    // Show orders history page
+    public function showOrdersHistory() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        $userId = $_SESSION['user_id'];
+        
+        // Get all user orders
+        $orders = $this->db->query(
+            "SELECT o.*, r.name as restaurant_name, r.logo_path 
+            FROM fastrewards_orders o
+            JOIN fastrewards_restaurants r ON o.restaurant_id = r.id
+            WHERE o.user_id = $1
+            ORDER BY o.created_at DESC",
+            [$userId]
+        );
+        
+        include 'views/orders_history.php';
+    }
+    
+    // Process file upload from scan page
+    public function processFileUpload() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        $userId = $_SESSION['user_id'];
+        
+        // Check if a file was uploaded
+        if(!isset($_FILES['receipt']) || $_FILES['receipt']['error'] !== UPLOAD_ERR_OK) {
+            $_SESSION['message'] = "Error uploading file. Please try again.";
+            header("Location: index.php?command=scan");
+            exit();
+        }
+        
+        // Validate restaurant selection
+        if(!isset($_POST['restaurant_id']) || empty($_POST['restaurant_id'])) {
+            $_SESSION['message'] = "Please select a restaurant.";
+            header("Location: index.php?command=scan");
+            exit();
+        }
+        
+        $restaurantId = intval($_POST['restaurant_id']);
+        
+        // Validate file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        $fileType = $_FILES['receipt']['type'];
+        
+        if(!in_array($fileType, $allowedTypes)) {
+            $_SESSION['message'] = "Invalid file type. Please upload a JPG, PNG, or PDF file.";
+            header("Location: index.php?command=scan");
+            exit();
+        }
+        
+        // Create uploads directory if it doesn't exist
+        $uploadDir = 'uploads/receipts/';
+        if(!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        // Generate unique filename
+        $filename = uniqid() . '_' . $_FILES['receipt']['name'];
+        $filePath = $uploadDir . $filename;
+        
+        // Move file to uploads directory
+        if(!move_uploaded_file($_FILES['receipt']['tmp_name'], $filePath)) {
+            $_SESSION['message'] = "Error saving file. Please try again.";
+            header("Location: index.php?command=scan");
+            exit();
+        }
+        
+        try {
+            // Save receipt in database
+            $this->db->query(
+                "INSERT INTO fastrewards_receipts (user_id, restaurant_id, file_path) 
+                VALUES ($1, $2, $3) RETURNING id",
+                [$userId, $restaurantId, $filePath]
+            );
+            
+            $receiptId = $this->db->fetch("SELECT lastval() as id")['id'];
+            
+            // For this demo, automatically approve the receipt and add points
+            $pointsEarned = rand(50, 200); // Random points between 50 and 200
+            
+            $this->db->query(
+                "UPDATE fastrewards_receipts 
+                SET status = 'approved', points_earned = $1, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = $2",
+                [$pointsEarned, $receiptId]
+            );
+            
+            // Add points to user's balance
+            $this->db->query(
+                "UPDATE fastrewards_point_balances 
+                SET points = points + $1, updated_at = CURRENT_TIMESTAMP 
+                WHERE user_id = $2 AND restaurant_id = $3",
+                [$pointsEarned, $userId, $restaurantId]
+            );
+            
+            $_SESSION['message'] = "Receipt uploaded successfully! You earned $pointsEarned points.";
+            header("Location: index.php?command=rewards");
+            exit();
+            
+        } catch (Exception $e) {
+            $_SESSION['message'] = "Error processing receipt: " . $e->getMessage();
+            header("Location: index.php?command=scan");
+            exit();
+        }
     }
 }
 ?> 
