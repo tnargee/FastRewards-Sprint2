@@ -79,6 +79,9 @@
           <li><a href="index.php?command=rewards" class="d-block py-1">Rewards</a></li>
           <li><a href="index.php?command=transfer" class="d-block py-1">Transfer</a></li>
           <li><a href="index.php?command=transactions" class="d-block py-1 active">Transactions</a></li>
+          <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
+          <li><a href="index.php?command=manage_deals" class="d-block py-1">Manage Deals</a></li>
+          <?php endif; ?>
         </ul>
       </div>
     </div>
@@ -94,6 +97,9 @@
         <a href="index.php?command=rewards" class="list-group-item list-group-item-action">Rewards</a>
         <a href="index.php?command=transfer" class="list-group-item list-group-item-action">Transfer</a>
         <a href="index.php?command=transactions" class="list-group-item list-group-item-action active">Transactions</a>
+        <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
+        <a href="index.php?command=manage_deals" class="list-group-item list-group-item-action">Manage Deals</a>
+        <?php endif; ?>
       </div>
     </nav>
 

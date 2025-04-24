@@ -162,6 +162,9 @@
           <li><a href="index.php?command=rewards" class="d-block py-1">Rewards</a></li>
           <li><a href="index.php?command=transfer" class="d-block py-1">Transfer</a></li>
           <li><a href="index.php?command=transactions" class="d-block py-1">Transactions</a></li>
+          <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
+          <li><a href="index.php?command=manage_deals" class="d-block py-1">Manage Deals</a></li>
+          <?php endif; ?>
         </ul>
       </div>
     </div>
@@ -191,6 +194,9 @@
             class="list-group-item list-group-item-action"
             >Transactions</a
           >
+          <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'developer'): ?>
+          <a href="index.php?command=manage_deals" class="list-group-item list-group-item-action">Manage Deals</a>
+          <?php endif; ?>
         </div>
       </nav>
 
@@ -217,54 +223,32 @@
           <!-- Deals Section -->
           <h4 class="section-title">Deals</h4>
           <div class="row">
+            <?php 
+            $deals = $this->getDeals();
+            foreach ($deals as $deal): 
+            ?>
             <div class="col-md-3 mb-4">
               <div class="reward-card">
-                <img src="assets/rewards/breakfast.png" alt="Breakfast Sandwich Set" class="reward-image">
+                <img src="<?php echo htmlspecialchars($deal['image_path']); ?>" alt="<?php echo htmlspecialchars($deal['title']); ?>" class="reward-image">
                 <div class="reward-info">
                   <div class="reward-header">
-                    <img src="assets/wawa.png" alt="Wawa Logo" class="restaurant-logo">
-                    <h5 class="reward-title">Breakfast Sandwich Set</h5>
+                    <img src="<?php echo htmlspecialchars($deal['logo_path']); ?>" alt="<?php echo htmlspecialchars($deal['restaurant_name']); ?> Logo" class="restaurant-logo">
+                    <h5 class="reward-title"><?php echo htmlspecialchars($deal['title']); ?></h5>
                   </div>
-                  <p class="reward-points">2500 points</p>
+                  <p class="reward-points"><?php echo htmlspecialchars($deal['points_required']); ?> points</p>
+                  <?php if (!empty($deal['description'])): ?>
+                  <p class="reward-description"><?php echo htmlspecialchars($deal['description']); ?></p>
+                  <?php endif; ?>
                 </div>
               </div>
             </div>
-            <div class="col-md-3 mb-4">
-              <div class="reward-card">
-                <img src="assets/rewards/hoagie-set.png" alt="Hoagie Set" class="reward-image">
-                <div class="reward-info">
-                  <div class="reward-header">
-                    <img src="assets/wawa.png" alt="Wawa Logo" class="restaurant-logo">
-                    <h5 class="reward-title">Hoagie Set</h5>
-                  </div>
-                  <p class="reward-points">3000 points</p>
-                </div>
-              </div>
+            <?php endforeach; ?>
+            
+            <?php if (count($deals) === 0): ?>
+            <div class="col-12 text-center">
+              <p>No deals available at the moment.</p>
             </div>
-            <div class="col-md-3 mb-4">
-              <div class="reward-card">
-                <img src="assets/rewards/egg-sand.png" alt="Egg Sandwich Deal" class="reward-image">
-                <div class="reward-info">
-                  <div class="reward-header">
-                    <img src="assets/starbucks.png" alt="Starbucks Logo" class="restaurant-logo">
-                    <h5 class="reward-title">Egg Sandwich Deal</h5>
-                  </div>
-                  <p class="reward-points">1000 points</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 mb-4">
-              <div class="reward-card">
-                <img src="assets/rewards/nuggets.jpg" alt="20 pc Nuggets Deal" class="reward-image">
-                <div class="reward-info">
-                  <div class="reward-header">
-                    <img src="assets/mcd.png" alt="McDonald's Logo" class="restaurant-logo">
-                    <h5 class="reward-title">20 pc Nuggets Deal</h5>
-                  </div>
-                  <p class="reward-points">5000 points</p>
-                </div>
-              </div>
-            </div>
+            <?php endif; ?>
           </div>
 
           <!-- Meals Section -->
@@ -379,4 +363,5 @@
     <!-- Bootstrap Bundle JS (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
+</html> 
 </html> 

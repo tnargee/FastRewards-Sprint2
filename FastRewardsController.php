@@ -63,6 +63,7 @@ class FastRewardsController {
                     $_SESSION['first_name'] = $user['first_name'];
                     $_SESSION['last_name'] = $user['last_name'];
                     $_SESSION['email'] = $user['email'];
+                    $_SESSION['role'] = $user['role'];
                     
                     // Initialize user point balances if they don't exist
                     $this->initUserPointBalances($user['id']);
@@ -533,9 +534,175 @@ class FastRewardsController {
     }
 
     public function logout() {
+        session_start();
         session_destroy();
         header("Location: index.php?command=signin");
         exit();
+    }
+
+    // Check if current user is a developer
+    public function isDeveloper() {
+        if(!isset($_SESSION)) {
+            session_start();
+        }
+        
+        return isset($_SESSION['role']) && $_SESSION['role'] === 'developer';
+    }
+    
+    // Show the deals management page for developers
+    public function showManageDeals() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!$this->isDeveloper()) {
+            $_SESSION['message'] = "You don't have permission to access this page.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        // Get all restaurants for the dropdown
+        $restaurants = $this->db->query("SELECT * FROM fastrewards_restaurants ORDER BY name");
+        
+        // Get all deals
+        $deals = $this->db->query("
+            SELECT d.*, r.name as restaurant_name, r.logo_path
+            FROM fastrewards_deals d
+            JOIN fastrewards_restaurants r ON d.restaurant_id = r.id
+            ORDER BY d.created_at DESC
+        ");
+        
+        include 'views/manage_deals.php';
+    }
+    
+    // Process adding or editing a deal
+    public function processDeal() {
+        if(!isset($_SESSION['user_id'])) {
+            header("Location: index.php?command=signin");
+            exit();
+        }
+        
+        if(!$this->isDeveloper()) {
+            $_SESSION['message'] = "You don't have permission to perform this action.";
+            header("Location: index.php?command=home");
+            exit();
+        }
+        
+        if(isset($_POST['deal_action'])) {
+            $action = $_POST['deal_action'];
+            
+            if($action === 'add' && 
+               isset($_POST['restaurant_id']) && 
+               isset($_POST['title']) && 
+               isset($_POST['points_required']) && 
+               isset($_POST['image_path'])) {
+                
+                $restaurantId = $_POST['restaurant_id'];
+                $title = trim($_POST['title']);
+                $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+                $pointsRequired = intval($_POST['points_required']);
+                $imagePath = trim($_POST['image_path']);
+                
+                if(empty($title) || $pointsRequired <= 0 || empty($imagePath)) {
+                    $_SESSION['message'] = "Please fill all required fields properly.";
+                    header("Location: index.php?command=manage_deals");
+                    exit();
+                }
+                
+                try {
+                    $this->db->query(
+                        "INSERT INTO fastrewards_deals (restaurant_id, title, description, points_required, image_path) 
+                         VALUES ($1, $2, $3, $4, $5)",
+                        [$restaurantId, $title, $description, $pointsRequired, $imagePath]
+                    );
+                    
+                    $_SESSION['message'] = "Deal created successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error creating deal: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_deals");
+                exit();
+            }
+            else if($action === 'edit' && 
+                    isset($_POST['deal_id']) && 
+                    isset($_POST['restaurant_id']) && 
+                    isset($_POST['title']) && 
+                    isset($_POST['points_required']) && 
+                    isset($_POST['image_path'])) {
+                
+                $dealId = $_POST['deal_id'];
+                $restaurantId = $_POST['restaurant_id'];
+                $title = trim($_POST['title']);
+                $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+                $pointsRequired = intval($_POST['points_required']);
+                $imagePath = trim($_POST['image_path']);
+                $active = isset($_POST['active']) ? 1 : 0;
+                
+                if(empty($title) || $pointsRequired <= 0 || empty($imagePath)) {
+                    $_SESSION['message'] = "Please fill all required fields properly.";
+                    header("Location: index.php?command=manage_deals");
+                    exit();
+                }
+                
+                try {
+                    $this->db->query(
+                        "UPDATE fastrewards_deals 
+                         SET restaurant_id = $1, title = $2, description = $3, 
+                         points_required = $4, image_path = $5, active = $6, updated_at = CURRENT_TIMESTAMP
+                         WHERE id = $7",
+                        [$restaurantId, $title, $description, $pointsRequired, $imagePath, $active, $dealId]
+                    );
+                    
+                    $_SESSION['message'] = "Deal updated successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error updating deal: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_deals");
+                exit();
+            }
+            else if($action === 'delete' && isset($_POST['deal_id'])) {
+                $dealId = $_POST['deal_id'];
+                
+                try {
+                    $this->db->query(
+                        "DELETE FROM fastrewards_deals WHERE id = $1",
+                        [$dealId]
+                    );
+                    
+                    $_SESSION['message'] = "Deal deleted successfully!";
+                } catch (Exception $e) {
+                    $_SESSION['message'] = "Error deleting deal: " . $e->getMessage();
+                }
+                
+                header("Location: index.php?command=manage_deals");
+                exit();
+            }
+        }
+        
+        $_SESSION['message'] = "Invalid request.";
+        header("Location: index.php?command=manage_deals");
+        exit();
+    }
+    
+    // Get deals for the rewards page
+    public function getDeals() {
+        try {
+            $deals = $this->db->query("
+                SELECT d.*, r.name as restaurant_name, r.logo_path
+                FROM fastrewards_deals d
+                JOIN fastrewards_restaurants r ON d.restaurant_id = r.id
+                WHERE d.active = true
+                ORDER BY d.created_at DESC
+            ");
+            
+            return $deals;
+        } catch (Exception $e) {
+            error_log("Error getting deals: " . $e->getMessage());
+            return [];
+        }
     }
 
     // Get point balances in JSON format for AJAX requests

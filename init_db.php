@@ -30,6 +30,7 @@ try {
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'user' NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     
@@ -62,11 +63,39 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     
+    // Create deals table
+    $db->query("CREATE TABLE fastrewards_deals (
+        id SERIAL PRIMARY KEY,
+        restaurant_id INTEGER NOT NULL REFERENCES fastrewards_restaurants(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        points_required INTEGER NOT NULL,
+        image_path VARCHAR(255) NOT NULL,
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
     // Insert default restaurants
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('McDonald''s', 'assets/mcd.png')");
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('Chipotle', 'assets/chipotle.png')");
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('Starbucks', 'assets/starbucks.png')");
     $db->query("INSERT INTO fastrewards_restaurants (name, logo_path) VALUES ('Wawa', 'assets/wawa.png')");
+    
+    // Insert developer user
+    $password_hash = password_hash('developer123', PASSWORD_DEFAULT);
+    $db->query("INSERT INTO fastrewards_users (first_name, last_name, email, password_hash, role) 
+                VALUES ('Dev', 'Admin', 'dev@example.com', '$password_hash', 'developer')");
+    
+    // Insert initial deals
+    $db->query("INSERT INTO fastrewards_deals (restaurant_id, title, description, points_required, image_path) 
+                VALUES (4, 'Breakfast Sandwich Set', 'Includes coffee and hashbrown', 2500, 'assets/rewards/breakfast.png')");
+    $db->query("INSERT INTO fastrewards_deals (restaurant_id, title, description, points_required, image_path) 
+                VALUES (4, 'Hoagie Set', 'Includes chips and drink', 3000, 'assets/rewards/hoagie-set.png')");
+    $db->query("INSERT INTO fastrewards_deals (restaurant_id, title, description, points_required, image_path) 
+                VALUES (3, 'Egg Sandwich Deal', 'With a free medium coffee', 1000, 'assets/rewards/egg-sand.png')");
+    $db->query("INSERT INTO fastrewards_deals (restaurant_id, title, description, points_required, image_path) 
+                VALUES (1, '20 pc Nuggets Deal', 'Includes large fries', 5000, 'assets/rewards/nuggets.jpg')");
     
     echo "Database tables and sequences created successfully!";
     

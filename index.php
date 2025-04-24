@@ -53,6 +53,12 @@ switch($command) {
     case 'getPointBalancesJson':
         $controller->getPointBalancesJson();
         break;
+    case 'manage_deals':
+        $controller->showManageDeals();
+        break;
+    case 'process_deal':
+        $controller->processDeal();
+        break;
     case 'logout':
         $controller->logout();
         break;
